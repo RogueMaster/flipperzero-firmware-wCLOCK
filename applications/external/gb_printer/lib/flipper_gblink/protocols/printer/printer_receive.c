@@ -7,8 +7,38 @@
 
 #define TAG "printer_receive"
 
-/* XXX: TODO: Double check this */
-#define HARD_TIMEOUT_US 1000000
+/* NOTE:
+ * These numbers are empirically gathered from a few different games thus far.
+ * There are many notes floating around the internet of the GB Printer having
+ * a 100 ms limit between packets where it will reset. However, I've seen
+ * Pokemon Pinball wait 99.5 ms between packets after a print command which is
+ * a bit too close for comfort. As this code tracks timestamps _after_ each byte,
+ * that ends up just over 110 ms which trips the hard timeout and resets state.
+ * This often cofuses the hell out of games.
+ *
+ * Additionally, on the other end of the spectrum, Pokemon Gold absolutely uses
+ * the hard timeout to reset the printer between packets. It waits ~278 ms, when
+ * it could just send an init command.
+ *
+ * Even more silly, Pokemon Pinball has a fun quirk where if the print completes
+ * immediately (usually the Flipper will mark a print complete with a single
+ * packet turnaround), it asks for status a couple of times, then starts (presumably)
+ * another status packet, but the second byte in the transfer is stopped mid-byte.
+ * Between that point and the start of the next, real packet, is 30 ms, 32.6 ms
+ * if you go from end of last byte received to start of next, real packet.
+ *
+ * This means there is some "soft" timeout that the printer uses to reset a packet
+ * transfer in progress, but don't reset the whole printer state.
+ *
+ * There are wisps of some "unknown" bit timeout of 1.49 ms. But I've not yet
+ * seen that in action.
+ *
+ * As far as I know, no one has dumped and reverse engineered the ROM of the
+ * Game Boy Printer directly. I think all of the existing documentation was from
+ * reverse engineering the communication channel. Maybe someday I'll dump the
+ * GB Printer ROM and try to better understand all of it.
+ */
+#define HARD_TIMEOUT_US 125000
 #define SOFT_TIMEOUT_US 20000
 
 static void printer_reset(struct printer_proto *printer)

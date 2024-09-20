@@ -1,7 +1,6 @@
 #pragma GCC optimize("O3")
 #pragma GCC optimize("-funroll-all-loops")
 
-// TODO: Add keys to top of the user dictionary, not the bottom
 // TODO: More efficient dictionary bruteforce by scanning through hardcoded very common keys and previously found dictionary keys first?
 //       (a cache for key_already_found_for_nonce_in_dict)
 // TODO: Selectively unroll loops to reduce binary size
@@ -31,13 +30,11 @@
 #include <storage/storage.h>
 
 // TODO: Remove defines that are not needed
-#define KEYS_DICT_SYSTEM_PATH        EXT_PATH("nfc/assets/mf_classic_dict.nfc")
-#define KEYS_DICT_USER_PATH          EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
-#define MF_CLASSIC_NONCE_PATH        EXT_PATH("nfc/.mfkey32.log")
-#define MF_CLASSIC_NESTED_NONCE_PATH EXT_PATH("nfc/.nested")
-#define TAG                          "MFKey"
-#define MAX_NAME_LEN                 32
-#define MAX_PATH_LEN                 64
+#define KEYS_DICT_SYSTEM_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
+#define KEYS_DICT_USER_PATH   EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
+#define TAG                   "MFKey"
+#define MAX_NAME_LEN          32
+#define MAX_PATH_LEN          64
 
 #define LF_POLY_ODD  (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
@@ -74,6 +71,8 @@ int check_state(struct Crypto1State* t, MfClassicNonce* n) {
         }
         return 0;
     } else if(n->attack == static_nested) {
+        // TODO: Needs to be revised to save all candidate keys for static encrypted when all properties produce a match
+        // A static encrypted MfClassicNonce has no nonce pair
         struct Crypto1State temp = {t->odd, t->even};
         rollback_word_noret(t, n->uid_xor_nt1, 0);
         if(n->ks1_1_enc == crypt_word_ret(t, n->uid_xor_nt0, 0)) {
@@ -727,12 +726,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         snprintf(draw_str, sizeof(draw_str), "Complete");
         canvas_draw_str_aligned(canvas, 40, 31, AlignLeft, AlignTop, draw_str);
+        // Mfkey32
         snprintf(
             draw_str,
             sizeof(draw_str),
             "Keys added to user dict: %d",
             program_state->unique_cracked);
         canvas_draw_str_aligned(canvas, 10, 41, AlignLeft, AlignTop, draw_str);
+        // TODO: Keys added to UID dict (Static Encrypted)
     } else if(program_state->mfkey_state == Ready) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "Ready");
