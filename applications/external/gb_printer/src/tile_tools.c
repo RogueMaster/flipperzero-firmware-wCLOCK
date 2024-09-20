@@ -7,11 +7,11 @@
 /* Copy src to dst converting from gb tile format to scanline format for
  * standard image data.
  */
-void tile_to_scanline(uint8_t* dst, uint8_t* src) {
+void tile_to_scanline(uint8_t* dst, uint8_t* src, size_t tiles_w, size_t tiles_h) {
     //size_t tile_w = 2; // 2 byte wide
     size_t tile_h = 8; // 8 byte tall
-    size_t tile_x_max = 20;
-    size_t tile_y_max = 18;
+    size_t tile_x_max = tiles_w;
+    size_t tile_y_max = tiles_h;
     size_t tile_x = 0;
     size_t tile_y = 0;
     size_t tile_suby = 0;

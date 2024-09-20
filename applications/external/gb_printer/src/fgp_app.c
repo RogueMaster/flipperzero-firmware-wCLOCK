@@ -14,6 +14,8 @@
 #include <src/scenes/include/fgp_scene.h>
 #include <src/views/include/receive_view.h>
 
+#include <protocols/printer/include/printer_proto.h>
+
 bool fgp_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     struct fgp_app* fgp = context;
@@ -42,7 +44,6 @@ static struct fgp_app* fgp_alloc(void) {
 
     // View Dispatcher
     fgp->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(fgp->view_dispatcher);
     view_dispatcher_set_event_callback_context(fgp->view_dispatcher, fgp);
     view_dispatcher_set_custom_event_callback(fgp->view_dispatcher, fgp_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(fgp->view_dispatcher, fgp_back_event_callback);
@@ -61,24 +62,31 @@ static struct fgp_app* fgp_alloc(void) {
         variable_item_list_get_view(fgp->variable_item_list));
 
     // Receive
-    fgp->receive_handle = fgp_receive_view_alloc(fgp);
+    fgp->receive_view = fgp_receive_view_alloc(fgp);
     view_dispatcher_add_view(
-        fgp->view_dispatcher, fgpViewReceive, fgp_receive_view_get_view(fgp->receive_handle));
+        fgp->view_dispatcher, fgpViewReceive, fgp_receive_view_get_view(fgp->receive_view));
 
     // Scene manager
     fgp->scene_manager = scene_manager_alloc(&fgp_scene_handlers, fgp);
     scene_manager_next_scene(fgp->scene_manager, fgpSceneMenu);
 
+    // Printer handling
+    fgp->printer_handle = printer_alloc();
+    printer_pin_set_default(fgp->printer_handle, PINOUT_ORIGINAL);
+
     return fgp;
 }
 
 static void fgp_free(struct fgp_app* fgp) {
+    // Printer handling
+    printer_free(fgp->printer_handle);
+
     // Scene manager
     scene_manager_free(fgp->scene_manager);
 
     // Receive View
     view_dispatcher_remove_view(fgp->view_dispatcher, fgpViewReceive);
-    fgp_receive_view_free(fgp->receive_handle);
+    fgp_receive_view_free(fgp->receive_view);
 
     // Variable Item List
     view_dispatcher_remove_view(fgp->view_dispatcher, fgpViewVariableItemList);

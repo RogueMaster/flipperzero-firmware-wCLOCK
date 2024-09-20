@@ -6,6 +6,6 @@
 
 #pragma once
 
-void tile_to_scanline(uint8_t* dst, uint8_t* src);
+void tile_to_scanline(uint8_t* dst, uint8_t* src, size_t tiles_w, size_t tiles_h);
 
 #endif // TILE_TOOLS_H

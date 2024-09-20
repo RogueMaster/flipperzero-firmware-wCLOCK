@@ -31,11 +31,11 @@ struct fgp_app {
     SceneManager* scene_manager;
     Submenu* submenu;
     VariableItemList* variable_item_list;
+    void* receive_view;
 
     Storage* storage;
 
-    void* receive_handle;
-    void* gblink_handle;
+    void* printer_handle;
 
     bool add_header;
     unsigned int palette_idx;

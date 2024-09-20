@@ -9,7 +9,7 @@
 void* png_alloc(uint32_t width, uint32_t height);
 
 /* Set up image */
-void* png_reset(void* png_handle);
+void png_reset(void* png_handle, size_t px_w, size_t px_h);
 
 void png_populate(void* png_handle, uint8_t* image_buf);
 

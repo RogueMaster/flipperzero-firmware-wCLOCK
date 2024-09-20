@@ -37,7 +37,6 @@ struct recv_ctx {
     ViewDispatcher* view_dispatcher;
 
     // Printer handling
-    void* gblink_handle;
     void* printer_handle;
 
     struct gb_image* volatile_image;
@@ -100,6 +99,8 @@ static bool fgp_receive_view_event(uint32_t event, void* context) {
     bool consumed = false;
     bool error = false;
     FuriString* fs_tmp;
+    uint8_t px_y = 0;
+    uint8_t px_x = 0;
 
     if(event == DATA) consumed = true;
 
@@ -115,8 +116,14 @@ static bool fgp_receive_view_event(uint32_t event, void* context) {
 		 */
         /* This copies everything except data */
         memcpy(image, ctx->volatile_image, sizeof(struct gb_image));
+
+        /* Prep some image information */
+        px_x = 160; // TODO: Photo! transfer will be less than this
+        px_y = image->data_sz / 40; // 40 is bytes per line, 160 px / 4 (px/byte)
+
         /* Now copy the image data, but as scanlines rather than tiles */
-        tile_to_scanline(image->data, ctx->volatile_image->data);
+        /* Tiles are 8x8 px */
+        tile_to_scanline(image->data, ctx->volatile_image->data, px_x / 8, px_y / 8);
 
         printer_receive_print_complete(ctx->printer_handle);
         with_view_model(ctx->view, struct recv_model * model, { model->count++; }, false);
@@ -134,7 +141,7 @@ static bool fgp_receive_view_event(uint32_t event, void* context) {
         }
 
         /* Save PNG */
-        png_reset(ctx->png_handle);
+        png_reset(ctx->png_handle, px_x, px_y);
         png_populate(ctx->png_handle, image->data);
         png_palette_set(ctx->png_handle, palette_rgb16_get(ctx->fgp->palette_idx));
         furi_string_printf(fs_tmp, "-%s.png", palette_shortname_get(ctx->fgp->palette_idx));
@@ -173,9 +180,8 @@ static void fgp_receive_view_enter(void* context) {
 	 * so I don't think there is a good way to issue a draw callback here.
 	 * Need to figure out a better way to handle this setup.
 	 */
-    ctx->printer_handle = printer_alloc();
-    printer_pin_set_default(ctx->printer_handle, PINOUT_ORIGINAL);
     ctx->image = printer_image_buffer_alloc();
+    ctx->printer_handle = ctx->fgp->printer_handle;
 
     ctx->file_handle = fgp_storage_alloc("GCIM_", ".bin");
 
@@ -198,7 +204,6 @@ static void fgp_receive_view_exit(void* context) {
     png_free(ctx->png_handle);
 
     printer_stop(ctx->printer_handle);
-    printer_free(ctx->printer_handle);
 
     printer_image_buffer_free(ctx->image);
     view_free_model(ctx->view);
@@ -231,10 +236,7 @@ View* fgp_receive_view_get_view(void* context) {
 void* fgp_receive_view_alloc(struct fgp_app* fgp) {
     struct recv_ctx* ctx = malloc(sizeof(struct recv_ctx));
 
-    ctx->gblink_handle = fgp->gblink_handle;
     ctx->view_dispatcher = fgp->view_dispatcher;
-    ctx->fgp = fgp;
-
     ctx->fgp = fgp;
 
     ctx->view = view_alloc();

@@ -541,6 +541,10 @@ static const char* subbrute_protocol_file_types[] = {
     [PT2260FileProtocol] = "Princeton",
     [HoneywellFileProtocol] = "Honeywell",
     [HoltekFileProtocol] = "Holtek_HT12X",
+    [LegrandFileProtocol] = "Legrand",
+    [HollarmileProtocol] = "Hollarm",
+    [GangQiFileProtocol] = "GangQi",
+    [Marantec24FileProtocol] = "Marantec24",
     [UnknownFileProtocol] = "Unknown"};
 
 /**

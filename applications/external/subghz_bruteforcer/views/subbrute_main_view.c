@@ -1,6 +1,5 @@
 #include "subbrute_main_view.h"
 #include "../subbrute_i.h"
-#include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
@@ -126,9 +125,9 @@ void subbrute_main_view_draw_is_byte_selected(Canvas* canvas, SubBruteMainViewMo
 
     // Switch to another mode
     if(model->two_bytes) {
-        elements_button_top_left(canvas, "Two bytes");
+        elements_button_up(canvas, "One byte");
     } else {
-        elements_button_top_left(canvas, "One byte");
+        elements_button_up(canvas, "Two bytes");
     }
 }
 

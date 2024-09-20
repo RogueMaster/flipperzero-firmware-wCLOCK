@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // Copyright (c) 2024 KBEmbedded
 
+#include <furi.h>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,10 +86,18 @@ struct png_handle {
 	 * copy to the start of footer inside image.
 	 */
     struct image_footer* footer_start;
-    uint32_t height;
-    uint32_t width;
-    uint32_t image_len; // Just the image data
-    uint32_t total_len; // This is the full image data from header to file end
+    /* TODO: These arn't really used at the moment aside from placeholders
+	 * that keep the total actual struct len in place. Maybe use them to
+	 * check info coming from png_reset() doesn't exceed these?
+	 */
+    /* TODO: Make these consts, other lengths can be rebuilt from that */
+    size_t max_height;
+    size_t max_width;
+    size_t max_total_len;
+    size_t height;
+    size_t width;
+    size_t image_len; // Just the image data
+    size_t total_len; // This is the full image data from header to file end
 };
 
 static const struct png_hdr png_hdr_data = {
@@ -166,11 +176,28 @@ void png_populate(void* png_handle, uint8_t* image_buf) {
         crc(png->image->idat.type, __builtin_bswap32(png->image->idat.data_len) + 4));
 }
 
-void* png_reset(void* png_handle) {
+void png_reset(void* png_handle, size_t px_w, size_t px_h) {
     struct png_handle* png = png_handle;
     struct image* image = png->image;
 
     memset(image, '\0', png->total_len);
+
+    /* Recalculate sizes, must be smaller than max allocated */
+    furi_check(png->max_height >= px_h);
+    furi_check(png->max_width >= px_w);
+    png->height = px_h;
+    png->width = px_w;
+    /* Since image data is 4 px per bit, the image length is (height*width/4),
+	 * and, PNG has a byte starting each "scanline" (each row), so add in
+	 * one more lump of height.
+	 */
+    png->image_len = (px_h * px_w / 4) + px_h;
+    /* The toal length is the image struct and footer. Both of which are the
+	 * complete amount of data needed to express everything except the image
+	 * data itself; plus the actual image data.
+	 */
+    png->total_len = sizeof(struct image) + sizeof(struct image_footer) + png->image_len;
+    png->footer_start = ((void*)(png->image) + sizeof(struct image) + png->image_len);
 
     /* Copy in static data bits */
     memcpy(&image->header, &png_hdr_data, sizeof(struct png_hdr));
@@ -186,13 +213,11 @@ void* png_reset(void* png_handle) {
     image->ihdr.height = __builtin_bswap32(png->height);
     image->idat.len = png->image_len;
     image->idat.nlen = ~(png->image_len);
-    image->idat.data_len = __builtin_bswap32(png->image_len + 11); // 12 is zlib header/footer size
+    image->idat.data_len = __builtin_bswap32(png->image_len + 11); // 11 is zlib header/footer size
 
     /* Calculate CRCs */
     image->ihdr_crc =
         __builtin_bswap32(crc(image->ihdr.type, __builtin_bswap32(image->ihdr.data_len) + 4));
-
-    return png;
 }
 
 /* Allocates pixel array */
@@ -202,8 +227,8 @@ void* png_alloc(uint32_t width, uint32_t height) {
     /* Allocate the data we will need.
 	 */
     png = malloc(sizeof(struct png_handle));
-    png->width = width;
-    png->height = height;
+    png->max_width = width;
+    png->max_height = height;
 
     /* Since image data is 4 px per bit, the image length is (height*width/4),
 	 * and, PNG has a byte starting each "scanline" (each row), so add in
@@ -214,11 +239,11 @@ void* png_alloc(uint32_t width, uint32_t height) {
 	 * complete amount of data needed to express everything except the image
 	 * data itself; plus the actual image data.
 	 */
-    png->total_len = sizeof(struct image) + sizeof(struct image_footer) + png->image_len;
-    png->image = malloc(png->total_len);
-    png->footer_start = ((void*)(png->image) + sizeof(struct image) + png->image_len);
+    png->max_total_len = sizeof(struct image) + sizeof(struct image_footer) + png->image_len;
+    png->image = malloc(png->max_total_len);
+    png->total_len = png->max_total_len;
 
-    png_reset(png);
+    png_reset(png, width, height);
 
     return png;
 }

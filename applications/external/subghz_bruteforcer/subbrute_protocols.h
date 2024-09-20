@@ -57,6 +57,10 @@ typedef enum {
     PT2260FileProtocol,
     HoneywellFileProtocol,
     HoltekFileProtocol,
+    LegrandFileProtocol,
+    HollarmileProtocol,
+    GangQiFileProtocol,
+    Marantec24FileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;

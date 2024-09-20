@@ -14,6 +14,7 @@
 const char* const list_text[] = {
     "Add header?",
     "Palette:",
+    "Select Pinout",
     "Receive!",
 };
 
@@ -41,11 +42,14 @@ static void set_palette(VariableItem* item) {
 static void enter_callback(void* context, uint32_t index) {
     struct fgp_app* fgp = context;
 
+    scene_manager_set_scene_state(fgp->scene_manager, fgpSceneReceiveConf, index);
     /* When the user presses enter on the last option in the list, that is
 	 * the cue to switch to the next scene.
 	 */
     if(index == COUNT_OF(list_text) - 1)
-        view_dispatcher_send_custom_event(fgp->view_dispatcher, fgpViewReceive);
+        view_dispatcher_send_custom_event(fgp->view_dispatcher, 0);
+    if(index == COUNT_OF(list_text) - 2)
+        view_dispatcher_send_custom_event(fgp->view_dispatcher, 1);
 }
 
 void fgp_scene_receive_conf_on_enter(void* context) {
@@ -53,7 +57,9 @@ void fgp_scene_receive_conf_on_enter(void* context) {
     VariableItem* item;
 
     variable_item_list_reset(fgp->variable_item_list);
-    variable_item_list_set_selected_item(fgp->variable_item_list, 0);
+    variable_item_list_set_selected_item(
+        fgp->variable_item_list,
+        scene_manager_get_scene_state(fgp->scene_manager, fgpSceneReceiveConf));
 
     /* Default enable adding the header */
     fgp->add_header = true;
@@ -62,14 +68,14 @@ void fgp_scene_receive_conf_on_enter(void* context) {
     variable_item_set_current_value_index(item, fgp->add_header);
     variable_item_set_current_value_text(item, yes_no_text[fgp->add_header]);
 
-    /* Default to the first palette */
-    fgp->palette_idx = 0;
     item = variable_item_list_add(
         fgp->variable_item_list, list_text[1], palette_count_get(), set_palette, fgp);
     variable_item_set_current_value_index(item, fgp->palette_idx);
     variable_item_set_current_value_text(item, palette_name_get(fgp->palette_idx));
 
     item = variable_item_list_add(fgp->variable_item_list, list_text[2], 0, NULL, fgp);
+
+    item = variable_item_list_add(fgp->variable_item_list, list_text[3], 0, NULL, fgp);
 
     variable_item_list_set_enter_callback(fgp->variable_item_list, enter_callback, fgp);
 
@@ -81,7 +87,10 @@ bool fgp_scene_receive_conf_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        view_dispatcher_switch_to_view(fgp->view_dispatcher, event.event);
+        if(event.event == 0)
+            view_dispatcher_switch_to_view(fgp->view_dispatcher, fgpViewReceive);
+        else
+            scene_manager_next_scene(fgp->scene_manager, fgpSceneSelectPins);
         consumed = true;
     }
     return consumed;

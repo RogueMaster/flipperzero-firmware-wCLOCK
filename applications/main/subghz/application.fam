@@ -21,6 +21,15 @@ App(
     fap_icon="icon.png",
     fap_category="Sub-GHz",
     sdk_headers=["subghz_fap.h"],
+    #  Below is a list of the different modifications and updates that have been made to the current Frequency Analyzer
+    #  [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
+    #  [Quiet Mode (by Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1) (Link Dead)
+    #  [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
+    #  [Ability to set RSSI trigger level, Sound and vibration on signal detect (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
+    #  [Long press OK button in SubGHz Frequency analyzer switch to Read menu with selected frequency (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/79)
+    #  [Sync with OFW for brand new interface and improve to 4 elements of history, abillity to disable sound and vibro with saving (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/121) (Elements from ClusterM, darmiel & Himura2la Stolen With No Credit)
+    #  [Add CC1101 module external support (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/534)
+    #  And a few bugfixes (By xMasterX)
 )
 
 App(
