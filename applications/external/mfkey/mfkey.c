@@ -9,7 +9,6 @@
 // TODO: Why different sscanf between Mfkey32 and Nested?
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 // TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
-// TODO: More accurate timing for Nested
 // TODO: Find ~1 KB memory leak
 
 #include <furi.h>
@@ -741,10 +740,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "Help");
     } else if(program_state->mfkey_state == Help) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 7, 20, AlignLeft, AlignTop, "Collect nonces using Detect");
-        canvas_draw_str_aligned(canvas, 7, 30, AlignLeft, AlignTop, "Reader or FlipperNested.");
-        canvas_draw_str_aligned(canvas, 7, 40, AlignLeft, AlignTop, "Devs: noproto, AG, ALiberty");
-        canvas_draw_str_aligned(canvas, 7, 50, AlignLeft, AlignTop, "Thanks: bettse, Foxushka");
+        canvas_draw_str_aligned(canvas, 7, 20, AlignLeft, AlignTop, "Collect nonces by reading");
+        canvas_draw_str_aligned(canvas, 7, 30, AlignLeft, AlignTop, "tag or reader in NFC app:");
+        canvas_draw_str_aligned(canvas, 7, 40, AlignLeft, AlignTop, "https://docs.flipper.net/");
+        canvas_draw_str_aligned(canvas, 7, 50, AlignLeft, AlignTop, "nfc/mfkey32");
     } else if(program_state->mfkey_state == Error) {
         canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Error");
         canvas_set_font(canvas, FontSecondary);

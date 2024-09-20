@@ -1,3 +1,5 @@
+## 3.0
+ - Added Static Encrypted Nested key recovery, added NFC app support, dropped FlipperNested support
 ## 2.7
  - Mfkey32 recovery is 30% faster, fix UI and slowdown bugs
 ## 2.6
