@@ -505,7 +505,6 @@ static FastJSApp* fast_js_app_alloc() {
 
     // Allocate and set up the view dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
     if(!app->view_dispatcher) {
         free(app->temp_buffer);
         free(app->selected_javascript_file);
