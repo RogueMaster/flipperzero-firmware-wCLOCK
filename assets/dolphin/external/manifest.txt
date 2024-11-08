@@ -1,24 +1,17 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
-Name: MjK_blank_128x64
+Name: L1_Akira_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 30
-Weight: 0
+Weight: 7
 
-Name: wrenchathome_F0Pattern_128x64
+Name: L1_Kaiju_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 2
-Max level: 30
-Weight: 6
-
-Name: Kuronons_RMCFW_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 2
+Min level: 1
 Max level: 30
 Weight: 7
 
@@ -43,14 +36,14 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: L1_Senpai_128x64
+Name: L1_Wotori_Purple_rain_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 7
 
-Name: L1_Wotori_Purple_rain_128x64
+Name: L2_Coding_in_the_shell_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
@@ -64,13 +57,6 @@ Min level: 2
 Max level: 30
 Weight: 7
 
-Name: L1_Kaiju_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
 Name: L2_Wake_up_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -78,28 +64,7 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: RM_G0G374_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 2
-Max level: 30
-Weight: 7
-
-Name: RM_OPxFlipper_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 2
-Max level: 30
-Weight: 7
-
-Name: Sasquach_Blaster_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: Sasquach_CloudG0ku_128x64
+Name: L3_Intruder_alert_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
@@ -113,37 +78,9 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: Sasquach_Narut0_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: Sasquach_RMCF_128x64
+Name: wrenchathome_F0Pattern_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 2
 Max level: 30
-Weight: 7
-
-Name: L2_Coding_in_the_shell_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L1_Akira_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L3_Intruder_alert_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
+Weight: 6
