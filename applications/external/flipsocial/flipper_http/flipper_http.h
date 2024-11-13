@@ -7,12 +7,13 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_serial.h>
 #include <storage/storage.h>
+#include <cfw/cfw.h>
 
 // STORAGE_EXT_PATH_PREFIX is defined in the Furi SDK as /ext
 
 #define HTTP_TAG               "FlipSocial" // change this to your app name
 #define http_tag               "flip_social" // change this to your app id
-#define UART_CH                (FuriHalSerialIdUsart) // UART channel
+#define UART_CH                (cfw_settings.uart_esp_channel) // UART channel
 #define TIMEOUT_DURATION_TICKS (5 * 1000) // 5 seconds
 #define BAUDRATE               (115200) // UART baudrate
 #define RX_BUF_SIZE            1024 // UART RX buffer size
@@ -79,6 +80,7 @@ extern FlipperHTTP fhttp;
 // Global static array for the line buffer
 extern char rx_line_buffer[RX_LINE_BUFFER_SIZE];
 extern uint8_t file_buffer[FILE_BUFFER_SIZE];
+extern size_t file_buffer_len;
 
 // fhttp.last_response holds the last received data from the UART
 

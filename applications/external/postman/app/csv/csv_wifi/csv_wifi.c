@@ -18,7 +18,7 @@ bool init_csv_wifi(App* app) {
     if(storage_file_exists(app->storage, APP_DATA_PATH("wifi.csv"))) {
         FURI_LOG_I(TAG, "CSV file exists, reading WiFi credentials from file");
 
-        if(!sync_csv_to_mem(app, app->csv_networks)) {
+        if(!sync_csv_to_mem(app)) {
             FURI_LOG_E(TAG, "Failed to read WiFi credentials from CSV file");
             storage_file_close(app->file);
             return false;
@@ -32,12 +32,16 @@ bool init_csv_wifi(App* app) {
             return false;
         }
         storage_file_close(app->file);
+
+        // Initialize csv_networks as empty
+        app->csv_networks = NULL;
+        app->csv_networks_count = 0;
     }
     FURI_LOG_T(TAG, "Done with initializing CSV");
     return true;
 }
 
-bool sync_csv_to_mem(App* app, WifiCredential* csv_networks) {
+bool sync_csv_to_mem(App* app) {
     FURI_LOG_T(TAG, "Syncing CSV with flipper memory");
     FuriString* buffer = furi_string_alloc();
 
@@ -47,17 +51,46 @@ bool sync_csv_to_mem(App* app, WifiCredential* csv_networks) {
         return false;
     }
 
-    size_t credential_index = 0;
-    while(read_line_from_file(app->file, buffer) && credential_index < MAX_WIFI_CREDENTIALS) {
-        WifiCredential wifi = {0};
-        const char* buffer_str = furi_string_get_cstr(buffer);
-        sscanf(buffer_str, "%31[^,],%63[^,],%d", wifi.ssid, wifi.password, (int*)&wifi.is_default);
-        csv_networks[credential_index++] = wifi;
+    // First, count the number of lines in the CSV file
+    size_t line_count = 0;
+    while(read_line_from_file(app->file, buffer)) {
+        line_count++;
     }
 
-    // Clear remaining entries in the array
-    for(size_t i = credential_index; i < MAX_WIFI_CREDENTIALS; i++) {
-        memset(&csv_networks[i], 0, sizeof(WifiCredential));
+    // Close and reopen the file to reset the file pointer
+    storage_file_close(app->file);
+    if(!storage_file_open(app->file, APP_DATA_PATH("wifi.csv"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to reopen file");
+        furi_string_free(buffer);
+        return false;
+    }
+
+    // Allocate memory for the csv_networks based on the number of lines
+    free(app->csv_networks); // Free the minimal memory allocated during init
+    if(line_count > 0) {
+        app->csv_networks = malloc(line_count * sizeof(WifiCredential));
+        if(!app->csv_networks) {
+            FURI_LOG_E(TAG, "Failed to allocate memory for csv_networks");
+            furi_string_free(buffer);
+            storage_file_close(app->file);
+            return false;
+        }
+    } else {
+        app->csv_networks = NULL;
+    }
+    app->csv_networks_count = line_count;
+
+    // Read and parse each line into the csv_networks
+    size_t index = 0;
+    while(index < line_count && read_line_from_file(app->file, buffer)) {
+        const char* buffer_str = furi_string_get_cstr(buffer);
+        sscanf(
+            buffer_str,
+            "%31[^,],%63[^,],%d",
+            app->csv_networks[index].ssid,
+            app->csv_networks[index].password,
+            (int*)&app->csv_networks[index].is_default);
+        index++;
     }
 
     furi_string_free(buffer);
@@ -89,7 +122,7 @@ bool write_wifi_to_csv(App* app, const WifiCredential* wifi) {
     return true;
 }
 
-bool read_wifis_from_csv(App* app, WifiCredential* csv_networks) {
+bool read_wifis_from_csv(App* app) {
     FURI_LOG_T(TAG, "Reading wifi's from CSV");
 
     FuriString* buffer = furi_string_alloc();
@@ -99,12 +132,46 @@ bool read_wifis_from_csv(App* app, WifiCredential* csv_networks) {
         return false;
     }
 
-    size_t credential_index = 0;
-    while(read_line_from_file(app->file, buffer) && credential_index < MAX_WIFI_CREDENTIALS) {
-        WifiCredential wifi = {0};
+    // First, count the number of lines in the CSV file
+    size_t line_count = 0;
+    while(read_line_from_file(app->file, buffer)) {
+        line_count++;
+    }
+
+    // Close and reopen the file to reset the file pointer
+    storage_file_close(app->file);
+    if(!storage_file_open(app->file, APP_DATA_PATH("wifi.csv"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to reopen file");
+        furi_string_free(buffer);
+        return false;
+    }
+
+    // Allocate memory for the csv_networks based on the number of lines
+    free(app->csv_networks); // Free the minimal memory allocated during init
+    if(line_count > 0) {
+        app->csv_networks = malloc(line_count * sizeof(WifiCredential));
+        if(!app->csv_networks) {
+            FURI_LOG_E(TAG, "Failed to allocate memory for csv_networks");
+            furi_string_free(buffer);
+            storage_file_close(app->file);
+            return false;
+        }
+    } else {
+        app->csv_networks = NULL;
+    }
+    app->csv_networks_count = line_count;
+
+    // Read and parse each line into the csv_networks
+    size_t index = 0;
+    while(index < line_count && read_line_from_file(app->file, buffer)) {
         const char* buffer_str = furi_string_get_cstr(buffer);
-        sscanf(buffer_str, "%31[^,],%63[^,],%d", wifi.ssid, wifi.password, (int*)&wifi.is_default);
-        csv_networks[credential_index++] = wifi;
+        sscanf(
+            buffer_str,
+            "%31[^,],%63[^,],%d",
+            app->csv_networks[index].ssid,
+            app->csv_networks[index].password,
+            (int*)&app->csv_networks[index].is_default);
+        index++;
     }
 
     furi_string_free(buffer);
@@ -124,7 +191,6 @@ bool delete_wifi_from_csv(App* app, const char* ssid) {
         FURI_LOG_E(TAG, "Failed to open file for reading");
         furi_string_free(buffer_wifi);
         furi_string_free(buffer_new_content);
-        storage_file_close(app->file);
         return false;
     }
 
@@ -149,7 +215,6 @@ bool delete_wifi_from_csv(App* app, const char* ssid) {
             FURI_LOG_E(TAG, "Failed to open file for writing");
             furi_string_free(buffer_wifi);
             furi_string_free(buffer_new_content);
-            storage_file_close(app->file);
             return false;
         }
 
@@ -166,7 +231,6 @@ bool delete_wifi_from_csv(App* app, const char* ssid) {
             FURI_LOG_E(TAG, "Failed to write new content to file");
             furi_string_free(buffer_wifi);
             furi_string_free(buffer_new_content);
-            storage_file_close(app->file);
             return false;
         }
 

@@ -918,6 +918,8 @@ FlipSocialApp* flip_social_app_alloc() {
                 '\0';
         }
 
+        auth_headers_alloc();
+
         // set variable item text (ommit the passwords)
         variable_item_set_current_value_text(
             app->variable_item_logged_in_wifi_settings_ssid, app->wifi_ssid_logged_in);

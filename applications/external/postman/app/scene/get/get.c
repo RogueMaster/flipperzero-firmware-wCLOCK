@@ -7,6 +7,31 @@
 #include "../../csv/csv_get_url/csv_get_url.h"
 #include "../../csv/csv_utils/csv_utils.h"
 
+static void get_scene_mode_callback(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    furi_assert(app);
+    furi_assert(app->get_state);
+
+    // Toggle mode
+    app->get_state->mode = !app->get_state->mode;
+
+    // Update the display text
+    variable_item_set_current_value_text(item, app->get_state->mode ? "Save" : "Display");
+    draw_get_menu(app);
+}
+
+static void get_scene_method_callback(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    furi_assert(app);
+    furi_assert(app->get_state);
+
+    // Toggle method
+    app->get_state->method = !app->get_state->method;
+
+    // Update the display text
+    variable_item_set_current_value_text(item, app->get_state->method ? "Stream" : "Get");
+}
+
 static void get_scene_select_callback(void* context, uint32_t index) {
     App* app = context;
     furi_assert(app);
@@ -34,7 +59,7 @@ static void get_scene_select_callback(void* context, uint32_t index) {
         }
     }
 
-    if(strlen(app->url_list[0].url) > 0) {
+    if(app->url_list && app->url_list_count > 0 && strlen(app->url_list[0].url) > 0) {
         if(!(strlen(app->get_state->url) > 0) && index == 3) {
             view_dispatcher_send_custom_event(app->view_dispatcher, GetItemLoadFromCsv);
         }
@@ -43,22 +68,6 @@ static void get_scene_select_callback(void* context, uint32_t index) {
             view_dispatcher_send_custom_event(app->view_dispatcher, GetItemLoadFromCsv);
         }
     }
-}
-
-static void get_scene_method_callback(VariableItem* item) {
-    App* app = variable_item_get_context(item);
-    furi_assert(app);
-    // Toggle between stream and get
-    app->get_state->method = !app->get_state->method;
-    draw_get_menu(app);
-}
-
-static void get_scene_mode_callback(VariableItem* item) {
-    App* app = variable_item_get_context(item);
-    furi_assert(app);
-    // Toggle between view and save to file
-    app->get_state->mode = !app->get_state->mode;
-    draw_get_menu(app);
 }
 
 void draw_get_menu(App* app) {
@@ -70,6 +79,10 @@ void draw_get_menu(App* app) {
 
     if(!app->get_state) {
         app->get_state = malloc(sizeof(GetState));
+        if(!app->get_state) {
+            FURI_LOG_E(TAG, "Failed to allocate get_state");
+            return;
+        }
         app->get_state->mode = false; // Default mode: Display
         strcpy(app->get_state->url, ""); // Default URL: empty
     }
@@ -107,13 +120,13 @@ void draw_get_menu(App* app) {
     bool url_found = url_in_csv(app, app->get_state->url, StateTypeGet);
     FURI_LOG_D(TAG, "URL in CSV: %d", url_found);
 
-    //Check if the URL is in the CSV
+    // Check if the URL is in the CSV
     if(strlen(app->get_state->url) > 0) {
         item = variable_item_list_add(
             variable_item_list, url_found ? "Delete from CSV" : "Save to CSV", 0, NULL, app);
     }
 
-    if(strlen(app->url_list[0].url) > 0) {
+    if(app->url_list && app->url_list_count > 0 && strlen(app->url_list[0].url) > 0) {
         item = variable_item_list_add(variable_item_list, "Load from CSV", 0, NULL, app);
     }
 }
@@ -128,6 +141,10 @@ void scene_on_enter_get(void* context) {
     // Initialize get_state if not already initialized
     if(!app->get_state) {
         app->get_state = malloc(sizeof(GetState));
+        if(!app->get_state) {
+            FURI_LOG_E(TAG, "Failed to allocate get_state");
+            return;
+        }
         app->get_state->mode = false; // Default mode: Display
         app->get_state->method = false; // Default method: GET
         strcpy(app->get_state->url, ""); // Default URL: empty

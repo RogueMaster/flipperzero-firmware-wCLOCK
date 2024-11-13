@@ -40,7 +40,7 @@ void nfc_maker_scene_save_name_on_enter(void* context) {
     furi_string_replace(prefix, " Plus", "+"); // NTAG I2C+
     furi_string_replace(prefix, " (Unknown)", "");
     furi_string_replace_all(prefix, " ", "_");
-    name_generator_make_auto(app->save_buf, BIG_INPUT_LEN, furi_string_get_cstr(prefix));
+    name_generator_make_auto(app->save_buf, sizeof(app->save_buf), furi_string_get_cstr(prefix));
     furi_string_free(prefix);
 
     nfc_maker_text_input_set_result_callback(
@@ -48,7 +48,7 @@ void nfc_maker_scene_save_name_on_enter(void* context) {
         nfc_maker_scene_save_name_text_input_callback,
         app,
         app->save_buf,
-        BIG_INPUT_LEN,
+        sizeof(app->save_buf),
         true);
 
     ValidatorIsFile* validator_is_file =

@@ -5,8 +5,9 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include "../scene/download/download.h"
+#include <cfw/cfw.h>
 
-#define UART_CH (FuriHalSerialIdUsart) // UART channel
+#define UART_CH (cfw_settings.uart_esp_channel) // UART channel
 
 struct Uart {
     App* app;

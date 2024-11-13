@@ -300,7 +300,7 @@ void app_scene_send_message_on_enter(void* context) {
 
     widget_reset(app->widget);
     widget_add_string_element(
-        app->widget, 65, 20, AlignCenter, AlignCenter, FontPrimary, "Wait to send it Message...");
+        app->widget, 65, 32, AlignCenter, AlignCenter, FontPrimary, "Waiting to send...");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, ViewWidget);
 
@@ -347,24 +347,16 @@ void app_scene_warning_log_on_enter(void* context) {
     widget_reset(app->widget);
 
     widget_add_string_element(
-        app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "W A R N I N G");
+        app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "W A R N I N G !");
 
-    widget_add_string_element(
+    widget_add_string_multiline_element(
         app->widget,
         65,
-        40,
+        35,
         AlignCenter,
-        AlignBottom,
-        FontSecondary,
-        "First go to the Sniffing option");
-    widget_add_string_element(
-        app->widget,
-        65,
-        50,
         AlignCenter,
-        AlignBottom,
         FontSecondary,
-        "in the menu and get the Id's");
+        "First go to the Sniffing option\nin the menu and get the ID's");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, ViewWidget);
 }

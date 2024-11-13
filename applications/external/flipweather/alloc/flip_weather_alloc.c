@@ -162,6 +162,23 @@ FlipWeatherApp* flip_weather_app_alloc() {
         }
     }
 
+    // Popup
+    if(!easy_flipper_set_popup(
+           &app->popup_error,
+           FlipWeatherViewPopupError,
+           "[ERROR]",
+           0,
+           0,
+           "Wifi Dev Board disconnected.\nPlease connect to the board.\nIf your board is connected,\nmake sure you have flashed\nyour WiFi Devboard with the\nlatest FlipperHTTP flash.",
+           0,
+           7,
+           flip_weather_popup_callback,
+           callback_to_submenu,
+           &app->view_dispatcher,
+           app)) {
+        return NULL;
+    }
+
     // Switch to the main view
     view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewSubmenu);
 

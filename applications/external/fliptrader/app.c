@@ -1,8 +1,5 @@
-#include "flip_trader_e.h"
-#include "flip_trader_storage.h"
-#include "flip_trader_callback.h"
-#include "flip_trader_i.h"
-#include "flip_trader_free.h"
+#include <flip_trader.h>
+#include <alloc/flip_trader_alloc.h>
 
 // Entry point for the FlipTrader application
 int32_t flip_trader_app(void* p) {

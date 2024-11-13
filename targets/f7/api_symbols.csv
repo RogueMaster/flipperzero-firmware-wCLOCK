@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,77.3,,
+Version,+,78.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -1348,7 +1348,6 @@ Function,+,furi_hal_bt_lock_core2,void,
 Function,+,furi_hal_bt_nvm_sram_sem_acquire,void,
 Function,+,furi_hal_bt_nvm_sram_sem_release,void,
 Function,+,furi_hal_bt_reinit,void,
-Function,+,furi_hal_bt_reverse_mac_addr,void,uint8_t[( 6 )]
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
 Function,+,furi_hal_bt_start_advertising,void,
 Function,+,furi_hal_bt_start_app,FuriHalBleProfileBase*,"const FuriHalBleProfileTemplate*, FuriHalBleProfileParams, GapEventCallback, void*"
@@ -3417,7 +3416,7 @@ Function,+,strint_to_int64,StrintParseError,"const char*, char**, int64_t*, uint
 Function,+,strint_to_uint16,StrintParseError,"const char*, char**, uint16_t*, uint8_t"
 Function,+,strint_to_uint32,StrintParseError,"const char*, char**, uint32_t*, uint8_t"
 Function,+,strint_to_uint64,StrintParseError,"const char*, char**, uint64_t*, uint8_t"
-Function,-,strlcat,size_t,"char*, const char*, size_t"
+Function,+,strlcat,size_t,"char*, const char*, size_t"
 Function,+,strlcpy,size_t,"char*, const char*, size_t"
 Function,+,strlen,size_t,const char*
 Function,-,strlwr,char*,char*

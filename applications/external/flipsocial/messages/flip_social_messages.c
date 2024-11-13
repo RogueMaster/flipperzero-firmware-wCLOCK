@@ -135,15 +135,13 @@ bool flip_social_get_message_users() {
         STORAGE_EXT_PATH_PREFIX "/apps_data/flip_social/message_users.txt");
 
     fhttp.save_received_data = true;
-    char* headers = jsmn("Content-Type", "application/json");
+    auth_headers_alloc();
     snprintf(
         command,
         128,
         "https://www.flipsocial.net/api/messages/%s/get/list/",
         app_instance->login_username_logged_out);
-    bool success = flipper_http_get_request_with_headers(command, headers);
-    free(headers);
-    if(!success) {
+    if(!flipper_http_get_request_with_headers(command, auth_headers)) {
         FURI_LOG_E(TAG, "Failed to send HTTP request for messages");
         fhttp.state = ISSUE;
         return false;
@@ -165,16 +163,14 @@ bool flip_social_get_messages_with_user() {
         STORAGE_EXT_PATH_PREFIX "/apps_data/flip_social/messages.txt");
 
     fhttp.save_received_data = true;
-    char* headers = jsmn("Content-Type", "application/json");
+    auth_headers_alloc();
     snprintf(
         command,
         128,
         "https://www.flipsocial.net/api/messages/%s/get/%s/",
         app_instance->login_username_logged_out,
         flip_social_message_users->usernames[flip_social_message_users->index]);
-    bool success = flipper_http_get_request_with_headers(command, headers);
-    free(headers);
-    if(!success) {
+    if(!flipper_http_get_request_with_headers(command, auth_headers)) {
         FURI_LOG_E(TAG, "Failed to send HTTP request for messages");
         fhttp.state = ISSUE;
         return false;

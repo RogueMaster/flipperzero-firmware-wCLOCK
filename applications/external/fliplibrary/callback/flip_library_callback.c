@@ -15,7 +15,7 @@ char* flip_library_parse_cat_fact() {
 }
 
 char* flip_library_parse_dog_fact() {
-    return get_json_array_value("facts", 0, fhttp.last_response, 128);
+    return get_json_array_value("facts", 0, fhttp.last_response, 256);
 }
 
 char* flip_library_parse_quote() {
@@ -241,6 +241,7 @@ void view_draw_callback_random_facts(Canvas* canvas, void* model) {
             if(!random_fact_request_success) {
                 FURI_LOG_E(TAG, "Failed to send request");
                 flip_library_request_error(canvas);
+                fhttp.state = ISSUE;
                 return;
             }
             fhttp.state = RECEIVING;
@@ -396,6 +397,7 @@ void view_draw_callback_random_facts(Canvas* canvas, void* model) {
                 flipper_http_get_request("https://uselessfacts.jsph.pl/api/v2/facts/random");
             if(!random_fact_request_success) {
                 FURI_LOG_E(TAG, "Failed to send request");
+                fhttp.state = ISSUE;
                 return;
             }
             fhttp.state = RECEIVING;
@@ -505,6 +507,8 @@ void view_draw_callback_dictionary_run(Canvas* canvas, void* model) {
             payload);
         if(!random_fact_request_success) {
             FURI_LOG_E(TAG, "Failed to send request");
+            flip_library_request_error(canvas);
+            fhttp.state = ISSUE;
             return;
         }
         fhttp.state = RECEIVING;

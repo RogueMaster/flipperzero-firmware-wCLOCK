@@ -25,6 +25,12 @@ void uart_terminal_scene_text_input_callback(void* context) {
     case TextInputState_BuildHttpPayload:
         view_dispatcher_send_custom_event(app->view_dispatcher, AppEvent_Build_Http_Payload);
         break;
+    case TextInputState_BuildHttpHeaderKey:
+        view_dispatcher_send_custom_event(app->view_dispatcher, AppEvent_Build_Http_Header_Key);
+        break;
+    case TextInputState_BuildHttpHeaderValue:
+        view_dispatcher_send_custom_event(app->view_dispatcher, AppEvent_Build_Http_Header_Value);
+        break;
     case TextInputState_Message:
         // Handle message input completion
         break;
@@ -73,6 +79,12 @@ void scene_on_enter_text_input(void* context) {
         break;
     case TextInputState_BuildHttpPayload:
         header_text = "Enter Payload";
+        break;
+    case TextInputState_BuildHttpHeaderKey:
+        header_text = "Enter Header Key";
+        break;
+    case TextInputState_BuildHttpHeaderValue:
+        header_text = "Enter Header Value";
         break;
     case TextInputState_Message:
         header_text = "Enter Message";
@@ -173,6 +185,73 @@ bool scene_on_event_text_input(void* context, SceneManagerEvent event) {
                 // Set the new content from text_input_store
                 furi_string_set_str(app->build_http_state->payload, app->text_input_store);
                 scene_manager_previous_scene(app->scene_manager);
+                consumed = true;
+            }
+            break;
+        case TextInputState_BuildHttpHeaderKey:
+            if(event.event == AppEvent_Build_Http_Header_Key) {
+                // Handle Header Key input completion,
+                // Copy the key to the headers dynamic array of size_t headers_count
+                // Allocate memory for headers
+                if(app->build_http_state->headers_count == 0) {
+                    app->build_http_state->headers = malloc(sizeof(HttpBuildHeader));
+                    if(!app->build_http_state->headers) {
+                        app->build_http_state->headers_count = 0;
+                        return false;
+                    }
+                    memset(app->build_http_state->headers, 0, sizeof(HttpBuildHeader));
+                } else {
+                    app->build_http_state->headers = realloc(
+                        app->build_http_state->headers,
+                        (app->build_http_state->headers_count + 1) * sizeof(HttpBuildHeader));
+                    if(!app->build_http_state->headers) {
+                        app->build_http_state->headers_count = 0;
+                        return false;
+                    }
+                }
+
+                strncpy(
+                    app->build_http_state->headers[app->build_http_state->headers_count].key,
+                    app->text_input_store,
+                    sizeof(
+                        app->build_http_state->headers[app->build_http_state->headers_count].key) -
+                        1);
+                app->build_http_state->headers[app->build_http_state->headers_count].key
+                    [sizeof(
+                         app->build_http_state->headers[app->build_http_state->headers_count].key) -
+                     1] = '\0'; // Ensure null-termination
+
+                // Initialize the value to an empty string
+                app->build_http_state->headers[app->build_http_state->headers_count].value[0] =
+                    '\0';
+
+                // Switch to Header Value input
+                app->text_input_state = TextInputState_BuildHttpHeaderValue;
+                scene_manager_next_scene(app->scene_manager, Text_Input);
+                consumed = true;
+            }
+            break;
+
+        case TextInputState_BuildHttpHeaderValue:
+            if(event.event == AppEvent_Build_Http_Header_Value) {
+                // Handle Header Value input completion
+                strncpy(
+                    app->build_http_state->headers[app->build_http_state->headers_count].value,
+                    app->text_input_store,
+                    sizeof(app->build_http_state->headers[app->build_http_state->headers_count]
+                               .value) -
+                        1);
+                app->build_http_state->headers[app->build_http_state->headers_count].value
+                    [sizeof(app->build_http_state->headers[app->build_http_state->headers_count]
+                                .value) -
+                     1] = '\0'; // Ensure null-termination
+
+                // Increment headers_count
+                app->build_http_state->headers_count++;
+
+                // Switch back to Header Key input
+                app->text_input_state = TextInputState_BuildHttpHeaderKey;
+                scene_manager_next_scene(app->scene_manager, Build_Http_Headers);
                 consumed = true;
             }
             break;

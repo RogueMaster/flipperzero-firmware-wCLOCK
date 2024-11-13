@@ -87,27 +87,16 @@ void path_file_name(const char* path, FuriString* file_name) {
     }
 }
 
-// For the device no connected
-void draw_device_fail_connected(App* app) {
-    widget_reset(app->widget);
-
-    widget_add_string_element(
-        app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "DEVICE NO");
-
-    widget_add_string_element(
-        app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "CONNECTED");
-}
-
 // For the message
 void draw_message_send(App* app) {
     widget_reset(app->widget);
     widget_add_string_element(
-        app->widget, 62, 30, AlignCenter, AlignBottom, FontPrimary, "Sending Ok...");
+        app->widget, 62, 25, AlignCenter, AlignBottom, FontPrimary, "Sending...");
 
     widget_add_string_element(
         app->widget,
         62,
-        50,
+        40,
         AlignCenter,
         AlignBottom,
         FontSecondary,
@@ -118,7 +107,7 @@ void draw_message_send(App* app) {
 void draw_message_fail(App* app) {
     widget_reset(app->widget);
     widget_add_string_element(
-        app->widget, 62, 30, AlignCenter, AlignBottom, FontPrimary, "Sending Fail...");
+        app->widget, 62, 30, AlignCenter, AlignBottom, FontPrimary, "Sending Failed...");
 
     widget_add_string_element(
         app->widget,
@@ -132,14 +121,16 @@ void draw_message_fail(App* app) {
 
 void draw_finished(App* app) {
     widget_reset(app->widget);
+    widget_add_icon_element(app->widget, 39, 0, &I_RPLYOK49x38);
     widget_add_string_element(
-        app->widget, 62, 32, AlignCenter, AlignBottom, FontPrimary, "Replay Finished");
+        app->widget, 62, 47, AlignCenter, AlignCenter, FontPrimary, "REPLAY FINISHED");
 }
 
 void draw_file_no_opened(App* app) {
     widget_reset(app->widget);
+    widget_add_icon_element(app->widget, 50, 0, &I_FILERROR27x38);
     widget_add_string_element(
-        app->widget, 62, 32, AlignCenter, AlignBottom, FontPrimary, "File cannot be opened");
+        app->widget, 62, 47, AlignCenter, AlignCenter, FontPrimary, "File cannot be opened");
 }
 
 void draw_starting_transmition(App* app) {
@@ -156,7 +147,7 @@ void play_data_frames_bk(void* context, int frame_interval) {
     debug = mcp2515_init(app->mcp_can);
 
     if(debug != ERROR_OK) {
-        draw_device_fail_connected(app);
+        draw_device_no_connected(app);
         return;
     }
 

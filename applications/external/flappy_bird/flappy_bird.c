@@ -484,8 +484,8 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         // Adjust Y position to keep character in bounds
         int adjusted_y = game_state->bird.point.y;
         if(adjusted_y < 0) adjusted_y = 0;
-        if(adjusted_y > FLIPPER_LCD_HEIGHT - dims.width) {
-            adjusted_y = FLIPPER_LCD_HEIGHT - dims.width;
+        if(adjusted_y > FLIPPER_LCD_HEIGHT - dims.height) {
+            adjusted_y = FLIPPER_LCD_HEIGHT - dims.height;
         }
 
         // Draw the character with adjusted position

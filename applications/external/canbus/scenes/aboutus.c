@@ -19,17 +19,15 @@ static void button_callback(GuiButtonType result, InputType input, void* context
 
 static void draw_present_view(App* app) {
     widget_reset(app->widget);
-    widget_add_string_element(
-        app->widget, 65, 20, AlignCenter, AlignCenter, FontPrimary, "ELECTRONIC CATS");
-    widget_add_string_element(
-        app->widget, 65, 35, AlignCenter, AlignCenter, FontPrimary, "Presents:");
-
+    widget_add_icon_element(app->widget, 40, 1, &I_EC48x26);
+    widget_add_string_multiline_element(
+        app->widget, 65, 40, AlignCenter, AlignCenter, FontPrimary, "ELECTRONIC CATS \n Presents:");
     widget_add_button_element(app->widget, GuiButtonTypeRight, "Next", button_callback, app);
 }
 
 static void draw_can_app_view(App* app) {
     widget_reset(app->widget);
-    widget_add_string_element(
+    widget_add_string_multiline_element(
         app->widget, 65, 20, AlignCenter, AlignCenter, FontPrimary, "CANBUS APP");
     widget_add_string_element(
         app->widget, 65, 35, AlignCenter, AlignCenter, FontSecondary, FAP_VERSION);
@@ -52,9 +50,7 @@ void draw_more_info_view(App* app) {
     widget_reset(app->widget);
     widget_add_string_element(
         app->widget, 10, 5, AlignLeft, AlignCenter, FontPrimary, "More info:");
-
     widget_add_icon_element(app->widget, 48, 15, &I_qrcode);
-
     widget_add_button_element(app->widget, GuiButtonTypeLeft, "Prev", button_callback, app);
 }
 

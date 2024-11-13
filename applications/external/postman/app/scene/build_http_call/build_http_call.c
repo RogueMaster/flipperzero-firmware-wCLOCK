@@ -87,6 +87,8 @@ void draw_build_http_call_menu(App* app) {
     bool url_set = strlen(app->build_http_state->url) > 0;
     bool payload_set = app->build_http_state->payload &&
                        !furi_string_empty(app->build_http_state->payload);
+    bool csv_set = app->build_http_list && strlen(app->build_http_list[0].url) > 0;
+    bool headers_set = app->build_http_state->headers_count > 0;
 
     bool url_found = false;
     if(url_set) {
@@ -123,7 +125,8 @@ void draw_build_http_call_menu(App* app) {
         variable_item_list_add(variable_item_list, url_set ? "Edit Url" : "Set URL", 0, NULL, app);
 
     // Set Headers button
-    item = variable_item_list_add(variable_item_list, "Set Headers", 0, NULL, app);
+    item = variable_item_list_add(
+        variable_item_list, headers_set ? "Edit Headers" : "Set Headers", 0, NULL, app);
 
     // Set Payload button
     item = variable_item_list_add(
@@ -143,7 +146,7 @@ void draw_build_http_call_menu(App* app) {
         item = variable_item_list_add(
             variable_item_list, url_found ? "Delete from CSV" : "Save to CSV", 0, NULL, app);
     }
-    if(app->build_http_list && strlen(app->build_http_list[0].url) > 0) {
+    if(csv_set) {
         item = variable_item_list_add(variable_item_list, "Load from CSV", 0, NULL, app);
     }
 }
@@ -179,6 +182,11 @@ bool scene_on_event_build_http_call(void* context, SceneManagerEvent event) {
     App* app = context;
     furi_assert(app);
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, MainMenu);
+        consumed = true;
+    }
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {

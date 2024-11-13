@@ -51,13 +51,13 @@ static int32_t obdii_get_car_data(void* context) {
 
         if(app->request_data == 1) {
             if(get_VIN(&scanner, app->text)) {
+                widget_add_icon_element(app->widget, 38, 1, &I_CAR52x20);
                 widget_add_string_element(
-                    app->widget, 64, 20, AlignCenter, AlignCenter, FontPrimary, "VIN Number:");
-
+                    app->widget, 64, 36, AlignCenter, AlignCenter, FontPrimary, "VIN Number:");
                 widget_add_string_element(
                     app->widget,
                     64,
-                    32,
+                    51,
                     AlignCenter,
                     AlignCenter,
                     FontSecondary,
@@ -68,13 +68,14 @@ static int32_t obdii_get_car_data(void* context) {
         }
         if(app->request_data == 2) {
             if(get_ECU_name(&scanner, app->text)) {
+                widget_add_icon_element(app->widget, 52, 1, &I_ECU24x24);
                 widget_add_string_element(
-                    app->widget, 64, 20, AlignCenter, AlignCenter, FontPrimary, "ECU Name:");
+                    app->widget, 65, 40, AlignCenter, AlignCenter, FontPrimary, "ECU Name:");
 
                 widget_add_string_element(
                     app->widget,
                     64,
-                    32,
+                    55,
                     AlignCenter,
                     AlignCenter,
                     FontSecondary,

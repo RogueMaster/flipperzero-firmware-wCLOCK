@@ -1,0 +1,14 @@
+App(
+    appid="flip_store",
+    name="FlipStore",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_flip_store",
+    stack_size=4 * 1024,
+    fap_icon="app.png",
+    fap_icon_assets="assets",
+    fap_category="GPIO/ESP32",
+    fap_author="JBlanked",
+    fap_weburl="https://github.com/jblanked/FlipStore",
+    fap_version="0.5",
+    fap_description="Download apps via WiFi directly to your Flipper Zero",
+)

@@ -16,14 +16,14 @@ void nfc_maker_scene_contact_on_enter(void* context) {
 
     nfc_maker_text_input_set_header_text(text_input, "Enter First Name:");
 
-    strlcpy(app->small_buf1, "John", SMALL_INPUT_LEN);
+    strlcpy(app->small_buf1, "John", sizeof(app->small_buf1));
 
     nfc_maker_text_input_set_result_callback(
         text_input,
         nfc_maker_scene_contact_text_input_callback,
         app,
         app->small_buf1,
-        SMALL_INPUT_LEN,
+        sizeof(app->small_buf1),
         true);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcMakerViewTextInput);

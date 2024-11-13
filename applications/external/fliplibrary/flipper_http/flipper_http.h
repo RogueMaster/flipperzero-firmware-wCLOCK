@@ -7,12 +7,13 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_serial.h>
 #include <storage/storage.h>
+#include <cfw/cfw.h>
 
 // STORAGE_EXT_PATH_PREFIX is defined in the Furi SDK as /ext
 
 #define HTTP_TAG               "FlipLibrary" // change this to your app name
 #define http_tag               "flip_library" // change this to your app id
-#define UART_CH                (FuriHalSerialIdUsart) // UART channel
+#define UART_CH                (cfw_settings.uart_esp_channel) // UART channel
 #define TIMEOUT_DURATION_TICKS (5 * 1000) // 5 seconds
 #define BAUDRATE               (115200) // UART baudrate
 #define RX_BUF_SIZE            1024 // UART RX buffer size

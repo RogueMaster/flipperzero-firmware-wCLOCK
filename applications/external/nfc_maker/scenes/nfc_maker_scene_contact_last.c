@@ -16,14 +16,14 @@ void nfc_maker_scene_contact_last_on_enter(void* context) {
 
     nfc_maker_text_input_set_header_text(text_input, "Enter Last Name:");
 
-    strlcpy(app->small_buf2, "Smith", SMALL_INPUT_LEN);
+    strlcpy(app->small_buf2, "Smith", sizeof(app->small_buf2));
 
     nfc_maker_text_input_set_result_callback(
         text_input,
         nfc_maker_scene_contact_last_text_input_callback,
         app,
         app->small_buf2,
-        SMALL_INPUT_LEN,
+        sizeof(app->small_buf2),
         true);
 
     nfc_maker_text_input_set_minimum_length(text_input, 0);

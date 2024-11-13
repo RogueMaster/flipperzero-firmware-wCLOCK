@@ -1,5 +1,9 @@
 # Changelog - Patch Notes
 
+## Version 2.2
+**New Features**
+- Update to gblink v0.63 which includes saving/loading of pin configurations for the EXT link interface
+
 ## Version 2.1
 **New Features**
 - Add ability to reset trade state without affecting current Pokemon being configured

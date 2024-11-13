@@ -38,16 +38,15 @@ bool flip_social_get_friends() {
         STORAGE_EXT_PATH_PREFIX "/apps_data/flip_social/friends.txt");
 
     fhttp.save_received_data = true;
-    char* headers = jsmn("Content-Type", "application/json");
+    auth_headers_alloc();
     snprintf(
         url,
         100,
         "https://www.flipsocial.net/api/user/friends/%s/",
         app_instance->login_username_logged_in);
-    bool success = flipper_http_get_request_with_headers(url, headers);
-    free(headers);
-    if(!success) {
+    if(!flipper_http_get_request_with_headers(url, auth_headers)) {
         FURI_LOG_E(TAG, "Failed to send HTTP request for friends");
+        fhttp.state = ISSUE;
         return false;
     }
     fhttp.state = RECEIVING;

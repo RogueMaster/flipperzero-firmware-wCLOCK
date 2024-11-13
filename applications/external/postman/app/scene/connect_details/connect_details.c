@@ -144,7 +144,7 @@ void submenu_callback_save_to_csv(void* context, uint32_t index) {
         FURI_LOG_E(TAG, "Failed to save WiFi details to CSV");
     }
     // sync csv with flipper memory
-    sync_csv_to_mem(app, app->csv_networks);
+    sync_csv_to_mem(app);
     // refresh the menu
     scene_on_enter_connect_details(context);
 }
@@ -158,7 +158,7 @@ void submenu_callback_forget_network(void* context, uint32_t index) {
         FURI_LOG_E(TAG, "Failed to forget network");
     }
     // sync csv with flipper memory
-    sync_csv_to_mem(app, app->csv_networks);
+    sync_csv_to_mem(app);
 
     // refresh the menu
     scene_on_enter_connect_details(context);
@@ -241,7 +241,7 @@ bool scene_on_event_connect_details(void* context, SceneManagerEvent event) {
     bool consumed = false;
     switch(event.type) {
     case SceneManagerEventTypeBack:
-        scene_manager_next_scene(app->scene_manager, MainMenu);
+        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, MainMenu);
         consumed = true;
         break;
     case SceneManagerEventTypeCustom:

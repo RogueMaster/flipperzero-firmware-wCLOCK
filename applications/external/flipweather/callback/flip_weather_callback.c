@@ -4,6 +4,15 @@ bool weather_request_success = false;
 bool sent_weather_request = false;
 bool got_weather_data = false;
 
+void flip_weather_popup_callback(void* context) {
+    FlipWeatherApp* app = (FlipWeatherApp*)context;
+    if(!app) {
+        FURI_LOG_E(TAG, "FlipWeatherApp is NULL");
+        return;
+    }
+    view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewSubmenu);
+}
+
 void flip_weather_request_error(Canvas* canvas) {
     if(fhttp.last_response != NULL) {
         if(strstr(fhttp.last_response, "[ERROR] Not connected to Wifi. Failed to reconnect.") !=
@@ -15,6 +24,13 @@ void flip_weather_request_error(Canvas* canvas) {
         } else if(strstr(fhttp.last_response, "[ERROR] Failed to connect to Wifi.") != NULL) {
             canvas_clear(canvas);
             canvas_draw_str(canvas, 0, 10, "[ERROR] Not connected to Wifi.");
+            canvas_draw_str(canvas, 0, 50, "Update your WiFi settings.");
+            canvas_draw_str(canvas, 0, 60, "Press BACK to return.");
+        } else if(
+            strstr(fhttp.last_response, "[ERROR] GET request failed or returned empty data.") !=
+            NULL) {
+            canvas_clear(canvas);
+            canvas_draw_str(canvas, 0, 10, "[ERROR] WiFi error.");
             canvas_draw_str(canvas, 0, 50, "Update your WiFi settings.");
             canvas_draw_str(canvas, 0, 60, "Press BACK to return.");
         } else {
@@ -41,9 +57,9 @@ void flip_weather_handle_gps_draw(Canvas* canvas, bool show_gps_data) {
             }
         }
         // check status
-        else if(fhttp.state == ISSUE || !get_request_success || fhttp.last_response == NULL) {
+        else if(fhttp.state == ISSUE || !get_request_success) {
             flip_weather_request_error(canvas);
-        } else if(fhttp.state == IDLE && fhttp.last_response != NULL) {
+        } else if(fhttp.state == IDLE) {
             // success, draw GPS
             process_geo_location();
 
@@ -79,23 +95,27 @@ void flip_weather_view_draw_callback_weather(Canvas* canvas, void* model) {
         return;
     }
 
-    canvas_draw_str(canvas, 0, 10, "Loading Weather...");
+    canvas_draw_str(canvas, 0, 10, "Loading location data...");
     // handle geo location until it's processed and then handle weather
 
     // start the process
-    if(!send_geo_location_request()) {
+    if(!send_geo_location_request() || fhttp.state == ISSUE) {
         flip_weather_request_error(canvas);
     }
     // wait until geo location is processed
     if(!sent_get_request || !get_request_success || fhttp.state == RECEIVING) {
+        canvas_draw_str(canvas, 0, 22, "Receiving data...");
         return;
     }
     // get/set geo lcoation once
     if(!geo_information_processed) {
         flip_weather_handle_gps_draw(canvas, false);
+        canvas_draw_str(canvas, 0, 34, "Parsed location data.");
     }
     // start the weather process
     if(!sent_weather_request && fhttp.state == IDLE) {
+        canvas_clear(canvas);
+        canvas_draw_str(canvas, 0, 10, "Getting Weather...");
         sent_weather_request = true;
         char url[512];
         char* lattitude = lat_data + 10;
@@ -123,8 +143,9 @@ void flip_weather_view_draw_callback_weather(Canvas* canvas, void* model) {
         }
 
         // check status
-        if(fhttp.state == ISSUE || !weather_request_success || fhttp.last_response == NULL) {
+        if(fhttp.state == ISSUE || !weather_request_success) {
             flip_weather_request_error(canvas);
+            fhttp.state = ISSUE;
         } else {
             // success, draw weather
             process_weather();
@@ -157,7 +178,7 @@ void flip_weather_view_draw_callback_gps(Canvas* canvas, void* model) {
         return;
     }
 
-    if(!send_geo_location_request()) {
+    if(!send_geo_location_request() || fhttp.state == ISSUE) {
         flip_weather_request_error(canvas);
     }
 
@@ -173,15 +194,17 @@ void callback_submenu_choices(void* context, uint32_t index) {
     switch(index) {
     case FlipWeatherSubmenuIndexWeather:
         if(!flip_weather_handle_ip_address()) {
-            return;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewPopupError);
+        } else {
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewWeather);
         }
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewWeather);
         break;
     case FlipWeatherSubmenuIndexGPS:
         if(!flip_weather_handle_ip_address()) {
-            return;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewPopupError);
+        } else {
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewGPS);
         }
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewGPS);
         break;
     case FlipWeatherSubmenuIndexAbout:
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipWeatherViewAbout);

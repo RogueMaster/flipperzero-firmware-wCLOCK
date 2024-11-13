@@ -1,5 +1,6 @@
 ## 0.7
 - Improved memory allocation
+- App restructured
 
 ## 0.6
 - Added a DOWNLOAD method, which downloads the file at the specified path. This is best used for downloading images, binary files, and other non-text files.

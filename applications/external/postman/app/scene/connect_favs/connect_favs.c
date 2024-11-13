@@ -18,7 +18,7 @@ void submenu_callback_select_fav_wifi(void* context, uint32_t index) {
 
     //Copy the csv list to the wifi list for connect details sync up
 
-    for(size_t i = 0; i < MAX_WIFI_CREDENTIALS; i++) {
+    for(size_t i = 0; i < app->csv_networks_count; i++) {
         strncpy(
             app->wifi_list.networks[i].ssid,
             app->csv_networks[i].ssid,
@@ -27,7 +27,7 @@ void submenu_callback_select_fav_wifi(void* context, uint32_t index) {
 
     // Copy the selected password to the password ssid
 
-    for(size_t i = 0; i < MAX_WIFI_CREDENTIALS; i++) {
+    for(size_t i = 0; i < app->csv_networks_count; i++) {
         if(strcmp(app->wifi_list.selected_ssid, app->csv_networks[i].ssid) == 0) {
             strncpy(
                 app->wifi_list.password_ssid,
@@ -51,12 +51,13 @@ void update_fav_wifi_menu(App* app) {
     FURI_LOG_T(TAG, "update_fav_wifi_menu");
 
     // Clear the submenu and add the actual WiFi networks
-    if(app->csv_networks[0].ssid[0] != '\0') {
+    if(app->csv_networks && app->csv_networks_count > 0 && app->csv_networks[0].ssid[0] != '\0') {
         submenu_reset(app->submenu);
         submenu_set_header(app->submenu, "Favorite WiFi's");
 
         // Add WiFi networks to submenu with updated state
-        for(size_t i = 0; i < MAX_WIFI_CREDENTIALS && app->csv_networks[i].ssid[0] != '\0'; i++) {
+        for(size_t i = 0; i < app->csv_networks_count && app->csv_networks[i].ssid[0] != '\0';
+            i++) {
             char display_name[MAX_SSID_LENGTH + 12]; // Extra space for "(connected)"
 
             // Trim SSIDs
@@ -125,7 +126,7 @@ bool scene_on_event_connect_favs(void* context, SceneManagerEvent event) {
 void scene_on_exit_connect_favs(void* context) {
     FURI_LOG_T(TAG, "scene_on_exit_connect_favs");
     App* app = context;
-    for(size_t i = 0; i < MAX_WIFI_CREDENTIALS && app->csv_networks[i].ssid[0] != '\0'; i++) {
+    for(size_t i = 0; i < app->csv_networks_count && app->csv_networks[i].ssid[0] != '\0'; i++) {
     }
 
     submenu_reset(app->submenu);

@@ -1,10 +1,5 @@
-#include <uart_text_input.h>
-#include <web_crawler_e.h>
-#include <flipper_http.h>
-#include <web_crawler_storage.h>
-#include <web_crawler_free.h>
-#include <web_crawler_callback.h>
-#include <web_crawler_i.h>
+#include <web_crawler.h>
+#include <alloc/web_crawler_alloc.h>
 /**
  * @brief      Entry point for the WebCrawler application.
  * @param      p  Input parameter - unused
@@ -13,8 +8,8 @@
 int32_t web_crawler_app(void* p) {
     UNUSED(p);
 
-    WebCrawlerApp* app = web_crawler_app_alloc();
-    if(!app) {
+    app_instance = web_crawler_app_alloc();
+    if(!app_instance) {
         FURI_LOG_E(TAG, "Failed to allocate WebCrawlerApp");
         return -1;
     }
@@ -25,10 +20,10 @@ int32_t web_crawler_app(void* p) {
     }
 
     // Run the application
-    view_dispatcher_run(app->view_dispatcher);
+    view_dispatcher_run(app_instance->view_dispatcher);
 
     // Free resources after the application loop ends
-    web_crawler_app_free(app);
+    web_crawler_app_free(app_instance);
 
     return 0;
 }

@@ -9,6 +9,6 @@ App(
     fap_category="GPIO/ESP32",
     fap_author="JBlanked",
     fap_weburl="https://github.com/jblanked/WebCrawler-FlipperZero",
-    fap_version="0.7",
+    fap_version="0.7.3",
     fap_description="Use Wi-Fi to access the internet and scrape data from the web.",
 )

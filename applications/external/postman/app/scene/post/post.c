@@ -37,13 +37,14 @@ static void post_scene_select_callback(void* context, uint32_t index) {
         }
         return;
     }
-    FURI_LOG_D(TAG, "url in the list: %s", app->post_url_list[0].url);
+
     // Load from CSV
-    if(strlen(app->post_url_list[0].url) > 0) {
+    if(app->post_url_list && app->post_url_list_count > 0 &&
+       strlen(app->post_url_list[0].url) > 0) {
         if(!(strlen(app->post_state->url) > 0) && index == 4) {
             view_dispatcher_send_custom_event(app->view_dispatcher, PostItemLoadFromCsv);
         }
-
+        FURI_LOG_D(TAG, "url in the list: %s", app->post_url_list[0].url);
         if(index == 6) {
             view_dispatcher_send_custom_event(app->view_dispatcher, PostItemLoadFromCsv);
         }
@@ -117,7 +118,8 @@ void draw_post_menu(App* app) {
         }
     }
 
-    if(strlen(app->post_url_list[0].url) > 0) {
+    if(app->post_url_list && app->post_url_list_count > 0 &&
+       strlen(app->post_url_list[0].url) > 0) {
         item = variable_item_list_add(variable_item_list, "Load from CSV", 0, NULL, app);
     }
 }

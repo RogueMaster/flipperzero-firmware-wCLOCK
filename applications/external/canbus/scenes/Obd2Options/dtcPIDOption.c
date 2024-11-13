@@ -96,39 +96,29 @@ static int32_t obdii_thread_dtc_on_work(void* context) {
     if(delete_dtc && run) {
         if(clear_dtc(&scanner)) {
             widget_reset(app->widget);
+            widget_add_icon_element(app->widget, 40, 0, &I_DTCLN47x20);
+            widget_add_string_multiline_element(
+                app->widget, 65, 43, AlignCenter, AlignBottom, FontPrimary, "ALL DTC\nCLEARED");
 
-            widget_add_string_element(
-                app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "ALL DTC");
-
-            widget_add_string_element(
-                app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "CLEARED");
         } else {
             widget_reset(app->widget);
 
-            widget_add_string_element(
-                app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "ERROR");
-
-            widget_add_string_element(
-                app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "CLEARING");
+            widget_add_string_multiline_element(
+                app->widget, 65, 43, AlignCenter, AlignBottom, FontPrimary, "E R R O R\nCLEARING");
         }
     } else if(!delete_dtc && run) {
         if(request_dtc(&scanner, &(count_dtc), codes)) {
             if(count_dtc == 0) {
-                widget_add_string_element(
-                    app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "NO DTC");
-
-                widget_add_string_element(
-                    app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "DETECTED");
+                widget_add_string_multiline_element(
+                    app->widget, 65, 43, AlignCenter, AlignBottom, FontPrimary, "NO DTC\nDETECTED");
 
             } else
                 loop = true;
 
         } else {
-            widget_add_string_element(
-                app->widget, 65, 20, AlignCenter, AlignBottom, FontPrimary, "REQUESTED");
-
-            widget_add_string_element(
-                app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "ERROR");
+            widget_add_icon_element(app->widget, 43, 0, &I_MSGERROR41x38);
+            widget_add_string_multiline_element(
+                app->widget, 65, 60, AlignCenter, AlignBottom, FontPrimary, "REQUEST\nERROR");
         }
 
     } else {

@@ -15,15 +15,42 @@ bool sync_csv_get_url_to_mem(App* app) {
         return false;
     }
 
-    size_t url_index = 0;
-    while(read_line_from_file(app->file, buffer) && url_index < MAX_URLS) {
-        const char* buffer_str = furi_string_get_cstr(buffer);
-        strncpy(app->url_list[url_index++].url, buffer_str, TEXT_STORE_SIZE - 1);
+    // First, count the number of lines in the CSV file
+    size_t line_count = 0;
+    while(read_line_from_file(app->file, buffer)) {
+        line_count++;
     }
 
-    // Clear remaining entries in the array
-    for(size_t i = url_index; i < MAX_URLS; i++) {
-        memset(app->url_list[i].url, 0, TEXT_STORE_SIZE);
+    // Close and reopen the file to reset the file pointer
+    storage_file_close(app->file);
+    if(!storage_file_open(app->file, APP_DATA_PATH("get_url.csv"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to reopen file");
+        furi_string_free(buffer);
+        return false;
+    }
+
+    // Allocate memory for the url_list based on the number of lines
+    free(app->url_list); // Free the minimal memory allocated during init
+    if(line_count > 0) {
+        app->url_list = malloc(line_count * sizeof(UrlList));
+        if(!app->url_list) {
+            FURI_LOG_E(TAG, "Failed to allocate memory for url_list");
+            furi_string_free(buffer);
+            storage_file_close(app->file);
+            return false;
+        }
+    } else {
+        app->url_list = NULL;
+    }
+    app->url_list_count = line_count;
+
+    // Read and parse each line into the url_list
+    size_t index = 0;
+    while(index < line_count && read_line_from_file(app->file, buffer)) {
+        const char* buffer_str = furi_string_get_cstr(buffer);
+        strncpy(app->url_list[index].url, buffer_str, TEXT_STORE_SIZE - 1);
+        app->url_list[index].url[TEXT_STORE_SIZE - 1] = '\0';
+        index++;
     }
 
     furi_string_free(buffer);
@@ -65,10 +92,42 @@ bool read_urls_from_csv(App* app) {
         return false;
     }
 
-    size_t url_index = 0;
-    while(read_line_from_file(app->file, buffer) && url_index < MAX_URLS) {
+    // First, count the number of lines in the CSV file
+    size_t line_count = 0;
+    while(read_line_from_file(app->file, buffer)) {
+        line_count++;
+    }
+
+    // Close and reopen the file to reset the file pointer
+    storage_file_close(app->file);
+    if(!storage_file_open(app->file, APP_DATA_PATH("get_url.csv"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to reopen file");
+        furi_string_free(buffer);
+        return false;
+    }
+
+    // Allocate memory for the url_list based on the number of lines
+    free(app->url_list); // Free the minimal memory allocated during init
+    if(line_count > 0) {
+        app->url_list = malloc(line_count * sizeof(UrlList));
+        if(!app->url_list) {
+            FURI_LOG_E(TAG, "Failed to allocate memory for url_list");
+            furi_string_free(buffer);
+            storage_file_close(app->file);
+            return false;
+        }
+    } else {
+        app->url_list = NULL;
+    }
+    app->url_list_count = line_count;
+
+    // Read and parse each line into the url_list
+    size_t index = 0;
+    while(index < line_count && read_line_from_file(app->file, buffer)) {
         const char* buffer_str = furi_string_get_cstr(buffer);
-        strncpy(app->url_list[url_index++].url, buffer_str, TEXT_STORE_SIZE - 1);
+        strncpy(app->url_list[index].url, buffer_str, TEXT_STORE_SIZE - 1);
+        app->url_list[index].url[TEXT_STORE_SIZE - 1] = '\0';
+        index++;
     }
 
     furi_string_free(buffer);
@@ -114,8 +173,7 @@ bool delete_url_from_csv(App* app, const char* url) {
             return false;
         }
 
-        //if the new content is empty, just close the file and return
-
+        // If the new content is empty, just close the file and return
         if(furi_string_size(buffer_new_content) == 0) {
             storage_file_close(app->file);
             return true;
@@ -145,9 +203,6 @@ bool delete_url_from_csv(App* app, const char* url) {
 bool init_csv_get_url(App* app) {
     FURI_LOG_T(TAG, "Initializing CSV for get urls");
 
-    // Allocate file
-    // app->file = storage_file_alloc(app->storage);
-
     if(!app->file) {
         FURI_LOG_E(TAG, "Failed to allocate storage file");
         return false;
@@ -172,6 +227,10 @@ bool init_csv_get_url(App* app) {
             return false;
         }
         storage_file_close(app->file);
+
+        // Initialize url_list as empty
+        app->url_list = NULL;
+        app->url_list_count = 0;
     }
 
     FURI_LOG_T(TAG, "Done with initializing CSV for get urls");

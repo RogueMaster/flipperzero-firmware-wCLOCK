@@ -32,6 +32,10 @@ bool init_csv_post_url(App* app) {
             return false;
         }
         storage_file_close(app->file);
+
+        // Initialize post_url_list as empty
+        app->post_url_list = NULL;
+        app->post_url_list_count = 0;
     }
     FURI_LOG_T(TAG, "Done with initializing POST URL CSV");
     return true;
@@ -47,20 +51,43 @@ bool sync_csv_post_url_to_mem(App* app) {
         return false;
     }
 
-    size_t url_index = 0;
-    while(read_line_from_file(app->file, buffer) && url_index < MAX_URLS) {
-        PostUrlList post_url = {0};
-        const char* buffer_str = furi_string_get_cstr(buffer);
-        char payload_str[TEXT_STORE_SIZE] = {0};
-        sscanf(buffer_str, "%[^,],%[^\n]", post_url.url, payload_str);
-        post_url.payload = furi_string_alloc_set(payload_str);
-        app->post_url_list[url_index++] = post_url;
+    // First, count the number of lines in the CSV file
+    size_t line_count = 0;
+    while(read_line_from_file(app->file, buffer)) {
+        line_count++;
     }
 
-    // Clear remaining entries in the array
-    for(size_t i = url_index; i < MAX_URLS; i++) {
-        memset(&app->post_url_list[i], 0, sizeof(PostUrlList));
-        app->post_url_list[i].payload = furi_string_alloc();
+    // Close and reopen the file to reset the file pointer
+    storage_file_close(app->file);
+    if(!storage_file_open(app->file, POST_URL_CSV_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to reopen POST URL file");
+        furi_string_free(buffer);
+        return false;
+    }
+
+    // Allocate memory for the post_url_list based on the number of lines
+    free(app->post_url_list); // Free the minimal memory allocated during init
+    if(line_count > 0) {
+        app->post_url_list = malloc(line_count * sizeof(PostUrlList));
+        if(!app->post_url_list) {
+            FURI_LOG_E(TAG, "Failed to allocate memory for post_url_list");
+            furi_string_free(buffer);
+            storage_file_close(app->file);
+            return false;
+        }
+    } else {
+        app->post_url_list = NULL;
+    }
+    app->post_url_list_count = line_count;
+
+    // Read and parse each line into the post_url_list
+    size_t index = 0;
+    while(index < line_count && read_line_from_file(app->file, buffer)) {
+        const char* buffer_str = furi_string_get_cstr(buffer);
+        char payload_str[TEXT_STORE_SIZE] = {0};
+        sscanf(buffer_str, "%[^,],%[^\n]", app->post_url_list[index].url, payload_str);
+        app->post_url_list[index].payload = furi_string_alloc_set(payload_str);
+        index++;
     }
 
     furi_string_free(buffer);
@@ -102,7 +129,6 @@ bool delete_post_url_from_csv(App* app, const char* url) {
         FURI_LOG_E(TAG, "Failed to open POST URL file for reading");
         furi_string_free(buffer_url);
         furi_string_free(buffer_new_content);
-        storage_file_close(app->file);
         return false;
     }
 
@@ -127,7 +153,6 @@ bool delete_post_url_from_csv(App* app, const char* url) {
             FURI_LOG_E(TAG, "Failed to open POST URL file for writing");
             furi_string_free(buffer_url);
             furi_string_free(buffer_new_content);
-            storage_file_close(app->file);
             return false;
         }
 
@@ -143,7 +168,6 @@ bool delete_post_url_from_csv(App* app, const char* url) {
             FURI_LOG_E(TAG, "Failed to write new content to POST URL file");
             furi_string_free(buffer_url);
             furi_string_free(buffer_new_content);
-            storage_file_close(app->file);
             return false;
         }
 

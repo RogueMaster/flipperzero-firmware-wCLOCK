@@ -9,6 +9,7 @@ extern bool weather_request_success;
 extern bool sent_weather_request;
 extern bool got_weather_data;
 
+void flip_weather_popup_callback(void* context);
 void flip_weather_request_error(Canvas* canvas);
 void flip_weather_handle_gps_draw(Canvas* canvas, bool show_gps_data);
 void flip_weather_view_draw_callback_weather(Canvas* canvas, void* model);

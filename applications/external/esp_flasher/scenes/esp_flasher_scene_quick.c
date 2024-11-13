@@ -16,8 +16,8 @@ enum QuickState {
     QuickStart,
     QuickS2Boot,
     QuickS2Boot_Marauder,
-    QuickS2Boot_Blackmagic,
     QuickS2Boot_Flipperhttp,
+    QuickS2Boot_Blackmagic,
     QuickWROOMBoot,
     QuickWROOMBoot_Marauder,
     QuickWROOMBoot_Wardriver,
@@ -29,8 +29,8 @@ enum QuickState {
     QuickWROOM_Wardriver,
     QuickS2,
     QuickS2_Marauder,
-    QuickS2_Blackmagic,
     QuickS2_Flipperhttp,
+    QuickS2_Blackmagic,
     QuickS3,
     QuickS3_Marauder,
     QuickS3_Wardriver,
@@ -91,11 +91,11 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             submenu, "Other ESP32-S3", QuickS3, esp_flasher_scene_quick_submenu_callback, app);
         break;
     case QuickS2Boot_Marauder:
-    case QuickS2Boot_Blackmagic:
     case QuickS2Boot_Flipperhttp:
+    case QuickS2Boot_Blackmagic:
     case QuickS2_Marauder:
-    case QuickS2_Blackmagic:
     case QuickS2_Flipperhttp:
+    case QuickS2_Blackmagic:
         submenu_set_header(submenu, "Choose Firmware:");
         submenu_add_item(
             submenu,
@@ -105,14 +105,14 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             app);
         submenu_add_item(
             submenu,
-            "Black Magic (FZ debugger)",
-            state > QuickS2 ? QuickS2_Blackmagic : QuickS2Boot_Blackmagic,
+            "FlipperHTTP (web access)",
+            state > QuickS2 ? QuickS2_Flipperhttp : QuickS2Boot_Flipperhttp,
             esp_flasher_scene_quick_submenu_callback,
             app);
         submenu_add_item(
             submenu,
-            "FlipperHTTP (web access)",
-            state > QuickS2 ? QuickS2_Flipperhttp : QuickS2Boot_Flipperhttp,
+            "Black Magic (FZ debugger)",
+            state > QuickS2 ? QuickS2_Blackmagic : QuickS2Boot_Blackmagic,
             esp_flasher_scene_quick_submenu_callback,
             app);
         break;
@@ -199,15 +199,6 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             firm = APP_DATA_PATH("assets/marauder/WifidevS2/marauder_v0_13_10_flipper.bin");
             break;
 
-        case QuickS2Boot_Blackmagic:
-            enter_bootloader = true;
-            /* fallthrough */
-        case QuickS2_Blackmagic:
-            boot = APP_DATA_PATH("assets/blackmagic/s2/bootloader.bin");
-            part = APP_DATA_PATH("assets/blackmagic/s2/partition-table.bin");
-            firm = APP_DATA_PATH("assets/blackmagic/s2/blackmagic.bin");
-            break;
-
         case QuickS2Boot_Flipperhttp:
             enter_bootloader = true;
             /* fallthrough */
@@ -215,6 +206,15 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             boot = APP_DATA_PATH("assets/flipperhttp/s2/flipper_http_bootloader.bin");
             part = APP_DATA_PATH("assets/flipperhttp/s2/flipper_http_partitions.bin");
             firm = APP_DATA_PATH("assets/flipperhttp/s2/flipper_http_firmware_a.bin");
+            break;
+
+        case QuickS2Boot_Blackmagic:
+            enter_bootloader = true;
+            /* fallthrough */
+        case QuickS2_Blackmagic:
+            boot = APP_DATA_PATH("assets/blackmagic/s2/bootloader.bin");
+            part = APP_DATA_PATH("assets/blackmagic/s2/partition-table.bin");
+            firm = APP_DATA_PATH("assets/blackmagic/s2/blackmagic.bin");
             break;
 
         case QuickWROOMBoot_Marauder:

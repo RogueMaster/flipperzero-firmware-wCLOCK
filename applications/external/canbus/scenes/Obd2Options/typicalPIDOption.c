@@ -26,9 +26,9 @@ void app_scene_obdii_typical_codes_on_enter(void* context) {
     submenu_add_item(app->submenu, "Engine Speed", 0, typical_menu_callback, app);
     submenu_add_item(app->submenu, "Vehicle Speed", 1, typical_menu_callback, app);
     submenu_add_item(app->submenu, "Calculated Engine Load", 2, typical_menu_callback, app);
-    submenu_add_item(app->submenu, "Thortle Position", 3, typical_menu_callback, app);
+    submenu_add_item(app->submenu, "Throttle Position", 3, typical_menu_callback, app);
     submenu_add_item(app->submenu, "Fuel Tank Input Level", 4, typical_menu_callback, app);
-    submenu_add_item(app->submenu, "Thortle Relative Position", 5, typical_menu_callback, app);
+    submenu_add_item(app->submenu, "Throttle Relative Position", 5, typical_menu_callback, app);
     submenu_add_item(app->submenu, "Time Engine Running", 6, typical_menu_callback, app);
 
     submenu_set_selected_item(
@@ -64,7 +64,7 @@ void app_scene_obdii_typical_codes_on_exit(void* context) {
 
 // Draw the unit medition
 void draw_value(App* app, const char* text) {
-    widget_add_string_element(app->widget, 65, 45, AlignCenter, AlignBottom, FontPrimary, text);
+    widget_add_string_element(app->widget, 65, 55, AlignCenter, AlignBottom, FontPrimary, text);
 }
 
 // Draws the data
@@ -77,49 +77,56 @@ void draw_scene(App* app, uint8_t selector, uint16_t variable) {
     widget_reset(app->widget);
 
     if(selector == 0) { // Engine Speed
+        widget_add_icon_element(app->widget, 50, 3, &I_RPM30x23);
         widget_add_string_element(
-            app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "ENGINE SPEED");
+            app->widget, 65, 40, AlignCenter, AlignBottom, FontPrimary, "ENGINE SPEED");
+
         text = "RPM";
+
     } else if(selector == 1) { // Vehicle Speed
+        widget_add_icon_element(app->widget, 37, 5, &I_SPD64x20);
         widget_add_string_element(
-            app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "VEHICLE SPEED");
-        text = "KM/H";
+            app->widget, 65, 40, AlignCenter, AlignBottom, FontPrimary, "VEHICLE SPEED");
+
+        text = "km/h";
 
     } else if(selector == 2) { // CALCULATED ENGINE LOAD
-        widget_add_string_element(
-            app->widget, 65, 15, AlignCenter, AlignBottom, FontPrimary, "CALCULATED");
-
-        widget_add_string_element(
-            app->widget, 65, 30, AlignCenter, AlignBottom, FontPrimary, "ENGINE LOAD");
+        widget_add_icon_element(app->widget, 50, 0, &I_LOAD28x20);
+        widget_add_string_multiline_element(
+            app->widget, 65, 43, AlignCenter, AlignBottom, FontPrimary, "CALCULATED\nENGINE LOAD");
 
         text = "%";
 
     } else if(selector == 3) { // Thortle Position
+        widget_add_icon_element(app->widget, 46, 0, &I_THR36x24);
         widget_add_string_element(
-            app->widget, 65, 35, AlignCenter, AlignBottom, FontPrimary, "THORLE POSITION");
+            app->widget, 65, 40, AlignCenter, AlignBottom, FontPrimary, "THROTTLE POSITION");
 
         text = "%";
 
     } else if(selector == 4) { // Fuel Tank Input Level
-        widget_add_string_element(
-            app->widget, 65, 15, AlignCenter, AlignBottom, FontPrimary, "FUEL TANK");
-        widget_add_string_element(
-            app->widget, 65, 30, AlignCenter, AlignBottom, FontPrimary, "INPUT LEVEL");
+        widget_add_icon_element(app->widget, 50, 0, &I_FTANK28x24);
+        widget_add_string_multiline_element(
+            app->widget, 65, 45, AlignCenter, AlignBottom, FontPrimary, "FUEL TANK\nINPUT LEVEL");
 
         text = "%";
 
     } else if(selector == 5) { // Thortle Relative Position
-        widget_add_string_element(
-            app->widget, 65, 15, AlignCenter, AlignBottom, FontPrimary, "THORTLE");
-        widget_add_string_element(
-            app->widget, 65, 30, AlignCenter, AlignBottom, FontPrimary, "RELATIVE POSITION");
+        widget_add_icon_element(app->widget, 46, 0, &I_THR36x24);
+        widget_add_string_multiline_element(
+            app->widget,
+            65,
+            45,
+            AlignCenter,
+            AlignBottom,
+            FontPrimary,
+            "THROTTLE\nRELATIVE POSITION");
 
         text = "%";
     } else if(selector == 6) {
-        widget_add_string_element(
-            app->widget, 65, 15, AlignCenter, AlignBottom, FontPrimary, "TIME SINCE");
-        widget_add_string_element(
-            app->widget, 65, 30, AlignCenter, AlignBottom, FontPrimary, "ENGINE START");
+        widget_add_icon_element(app->widget, 45, 0, &I_ENGTIME39x21);
+        widget_add_string_multiline_element(
+            app->widget, 65, 43, AlignCenter, AlignBottom, FontPrimary, "TIME SINCE\nENGINE START");
 
         text = "seg";
     }
@@ -246,7 +253,7 @@ static int32_t obdii_thread_on_work(void* context) {
                     draw_scene(app, option, calculate_engine_load(data[3]));
                     break;
 
-                case 3: // Thortle Position
+                case 3: // Throttle Position
                     draw_scene(app, option, calculate_engine_load(data[3]));
                     break;
 

@@ -299,7 +299,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         while(len && canvas_string_width(canvas, str) > needed_string_width) {
             str[len--] = '\0';
         }
-        strcat(str, "...");
+        strlcat(str, "...", sizeof(buf) - (str - buf));
     }
 
     canvas_draw_str(canvas, start_pos, 22, str);

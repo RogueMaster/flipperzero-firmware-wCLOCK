@@ -14,7 +14,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x02; // Media-type [RFC 2046]
         type = "application/vnd.bluetooth.ep.oob";
 
-        data_len = MAC_INPUT_LEN;
+        data_len = sizeof(app->mac_buf);
         payload_len = data_len + 2;
         payload = payload_it = malloc(payload_len);
 
@@ -36,15 +36,15 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
             vcard,
             "FN:%s%s%s\r\n",
             app->small_buf1,
-            strnlen(app->small_buf2, SMALL_INPUT_LEN) ? " " : "",
+            app->small_buf2[0] ? " " : "",
             app->small_buf2);
-        if(strnlen(app->mail_buf, MAIL_INPUT_LEN)) {
+        if(app->mail_buf[0]) {
             furi_string_cat_printf(vcard, "EMAIL:%s\r\n", app->mail_buf);
         }
-        if(strnlen(app->phone_buf, PHONE_INPUT_LEN)) {
+        if(app->phone_buf[0]) {
             furi_string_cat_printf(vcard, "TEL:%s\r\n", app->phone_buf);
         }
-        if(strnlen(app->big_buf, BIG_INPUT_LEN)) {
+        if(app->big_buf[0]) {
             furi_string_cat_printf(vcard, "URL:%s\r\n", app->big_buf);
         }
         furi_string_cat_printf(vcard, "END:VCARD\r\n");
@@ -60,7 +60,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x01; // NFC Forum well-known type [NFC RTD]
         type = "U";
 
-        data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+        data_len = strlen(app->big_buf);
         payload_len = data_len + 1;
         payload = payload_it = malloc(payload_len);
 
@@ -73,7 +73,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x01; // NFC Forum well-known type [NFC RTD]
         type = "U";
 
-        data_len = strnlen(app->mail_buf, MAIL_INPUT_LEN);
+        data_len = strlen(app->mail_buf);
         payload_len = data_len + 1;
         payload = payload_it = malloc(payload_len);
 
@@ -86,7 +86,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x01; // NFC Forum well-known type [NFC RTD]
         type = "U";
 
-        data_len = strnlen(app->phone_buf, PHONE_INPUT_LEN);
+        data_len = strlen(app->phone_buf);
         payload_len = data_len + 1;
         payload = payload_it = malloc(payload_len);
 
@@ -99,7 +99,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x01; // NFC Forum well-known type [NFC RTD]
         type = "T";
 
-        data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+        data_len = strlen(app->big_buf);
         payload_len = data_len + 3;
         payload = payload_it = malloc(payload_len);
 
@@ -114,7 +114,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x01; // NFC Forum well-known type [NFC RTD]
         type = "U";
 
-        data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+        data_len = strlen(app->big_buf);
         payload_len = data_len + 1;
         payload = payload_it = malloc(payload_len);
 
@@ -129,8 +129,8 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
 
         // https://android.googlesource.com/platform/packages/apps/Nfc/+/refs/heads/main/src/com/android/nfc/NfcWifiProtectedSetup.java
         // https://github.com/bparmentier/WiFiKeyShare/blob/master/app/src/main/java/be/brunoparmentier/wifikeyshare/utils/NfcUtils.java
-        uint8_t ssid_len = strnlen(app->small_buf1, SMALL_INPUT_LEN);
-        uint8_t pass_len = strnlen(app->small_buf2, SMALL_INPUT_LEN);
+        uint8_t ssid_len = strlen(app->small_buf1);
+        uint8_t pass_len = strlen(app->small_buf2);
         uint8_t data_len = ssid_len + pass_len;
         payload_len = data_len + 39;
         payload = payload_it = malloc(payload_len);

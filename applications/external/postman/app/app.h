@@ -52,16 +52,19 @@ typedef struct {
 
     // WIFI lists
     AvailableWifiList wifi_list; // This holds the board wifi scan results
-    WifiCredential csv_networks[MAX_WIFI_NETWORKS]; // List of wifi networks from csv
+    WifiCredential* csv_networks; // List of wifi networks from csv
+    size_t csv_networks_count; // Number of wifi networks from csv
 
     // GET VIEW
     VariableItemList* variable_item_list; // Variable item list for get view
     GetState* get_state; // Get state for get view
-    UrlList url_list[MAX_URLS]; // List of get urls
+    UrlList* url_list; // Dynamic list of get urls
+    size_t url_list_count; // List of get urls count
 
     // POST VIEW
     PostState* post_state; // Post state for get view
-    PostUrlList post_url_list[MAX_URLS];
+    PostUrlList* post_url_list;
+    size_t post_url_list_count; // List of post urls count
 
     // Save to file global flag for uart responses
     bool save_to_file; // Flag for saving uart responses to file

@@ -20,6 +20,8 @@ bool flip_social_send_message = false;
 char* last_explore_response = NULL;
 char* selected_message = NULL;
 
+char auth_headers[256] = {0};
+
 /**
  * @brief Function to free the resources used by FlipSocialApp.
  * @details Cleans up all allocated resources before exiting the application.
@@ -241,6 +243,8 @@ void flip_social_app_free(FlipSocialApp* app) {
     if(app->message_user_choice_logged_in) free(app->message_user_choice_logged_in);
     if(app->message_user_choice_logged_in_temp_buffer)
         free(app->message_user_choice_logged_in_temp_buffer);
+    if(last_explore_response) free(last_explore_response);
+    if(selected_message) free(selected_message);
 
     if(app->input_event && app->input_event_queue)
         furi_pubsub_unsubscribe(app->input_event_queue, app->input_event);
@@ -250,4 +254,28 @@ void flip_social_app_free(FlipSocialApp* app) {
 
     // Free the app structure
     if(app_instance) free(app_instance);
+}
+
+void auth_headers_alloc(void) {
+    if(!app_instance) {
+        return;
+    }
+
+    if(app_instance->login_username_logged_out && app_instance->login_password_logged_out) {
+        snprintf(
+            auth_headers,
+            sizeof(auth_headers),
+            "{\"Content-Type\":\"application/json\",\"username\":\"%s\",\"password\":\"%s\"}",
+            app_instance->login_username_logged_out,
+            app_instance->login_password_logged_out);
+    } else if(app_instance->login_username_logged_in && app_instance->change_password_logged_in) {
+        snprintf(
+            auth_headers,
+            sizeof(auth_headers),
+            "{\"Content-Type\":\"application/json\",\"username\":\"%s\",\"password\":\"%s\"}",
+            app_instance->login_username_logged_in,
+            app_instance->change_password_logged_in);
+    } else {
+        snprintf(auth_headers, sizeof(auth_headers), "{\"Content-Type\":\"application/json\"}");
+    }
 }

@@ -132,12 +132,22 @@ void flip_social_callback_draw_compose(Canvas* canvas, void* model) {
         FURI_LOG_E(TAG, "FlipSocialApp is NULL");
         return;
     }
+    if(!selected_message) {
+        FURI_LOG_E(TAG, "Selected message is NULL");
+        return;
+    }
+
+    if(strlen(selected_message) > MAX_MESSAGE_LENGTH) {
+        FURI_LOG_E(TAG, "Message is too long");
+        return;
+    }
 
     if(!flip_social_dialog_shown) {
         flip_social_dialog_shown = true;
         app_instance->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
         app_instance->input_event =
             furi_pubsub_subscribe(app_instance->input_event_queue, on_input, NULL);
+        auth_headers_alloc();
     }
 
     draw_user_message(canvas, selected_message, 0, 2);
@@ -159,6 +169,10 @@ void flip_social_callback_draw_compose(Canvas* canvas, void* model) {
     case ActionNext:
         // send selected_message
         if(selected_message && app_instance->login_username_logged_in) {
+            if(strlen(selected_message) > MAX_MESSAGE_LENGTH) {
+                FURI_LOG_E(TAG, "Message is too long");
+                return;
+            }
             // Send the selected_message
             char command[256];
             snprintf(
@@ -168,12 +182,8 @@ void flip_social_callback_draw_compose(Canvas* canvas, void* model) {
                 app_instance->login_username_logged_in,
                 selected_message);
 
-            bool success = flipper_http_post_request_with_headers(
-                "https://www.flipsocial.net/api/feed/post/",
-                "{\"Content-Type\":\"application/json\"}",
-                command);
-
-            if(!success) {
+            if(!flipper_http_post_request_with_headers(
+                   "https://www.flipsocial.net/api/feed/post/", auth_headers, command)) {
                 FURI_LOG_E(TAG, "Failed to send HTTP request for feed");
                 fhttp.state = ISSUE;
                 return;
@@ -185,23 +195,12 @@ void flip_social_callback_draw_compose(Canvas* canvas, void* model) {
             FURI_LOG_E(TAG, "Message or username is NULL");
             return;
         }
-
-        int i = 0;
         while(fhttp.state == RECEIVING && furi_timer_is_running(fhttp.get_timeout_timer) > 0) {
             // Wait for the feed to be received
             furi_delay_ms(100);
 
-            char dots_str[64] = "Receiving";
-
-            // Append dots to the string based on the value of i
-            int dot_count = i % 4;
-            int len = strlen(dots_str);
-            snprintf(dots_str + len, sizeof(dots_str) - len, "%.*s", dot_count, "....");
-
             // Draw the resulting string on the canvas
-            canvas_draw_str(canvas, 0, 30, dots_str);
-
-            i++;
+            canvas_draw_str(canvas, 0, 30, "Receiving..");
         }
         flip_social_dialog_stop = true;
         furi_timer_stop(fhttp.get_timeout_timer);
@@ -372,6 +371,7 @@ void flip_social_callback_draw_feed(Canvas* canvas, void* model) {
         app_instance->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
         app_instance->input_event =
             furi_pubsub_subscribe(app_instance->input_event_queue, on_input, NULL);
+        auth_headers_alloc();
     }
 
     // handle action
@@ -442,9 +442,7 @@ void flip_social_callback_draw_feed(Canvas* canvas, void* model) {
             app_instance->login_username_logged_in,
             flip_social_feed->ids[flip_social_feed->index]);
         flipper_http_post_request_with_headers(
-            "https://www.flipsocial.net/api/feed/flip/",
-            "{\"Content-Type\":\"application/json\"}",
-            payload);
+            "https://www.flipsocial.net/api/feed/flip/", auth_headers, payload);
         flip_social_canvas_draw_message(
             canvas,
             flip_social_feed->usernames[flip_social_feed->index],
@@ -514,9 +512,7 @@ void flip_social_callback_draw_login(Canvas* canvas, void* model) {
             app_instance->login_username_logged_out,
             app_instance->login_password_logged_out);
         flip_social_login_success = flipper_http_post_request_with_headers(
-            "https://www.flipsocial.net/api/user/login/",
-            "{\"Content-Type\":\"application/json\"}",
-            buffer);
+            "https://www.flipsocial.net/api/user/login/", buffer, buffer);
         if(flip_social_login_success) {
             fhttp.state = RECEIVING;
             return;
@@ -679,6 +675,9 @@ void flip_social_callback_draw_register(Canvas* canvas, void* model) {
 
                 app_instance->is_logged_in = "true";
 
+                // update header credentials
+                auth_headers_alloc();
+
                 // save the credentials
                 save_settings(
                     app_instance->wifi_ssid_logged_out,
@@ -755,6 +754,7 @@ void flip_social_callback_draw_explore(Canvas* canvas, void* model) {
         app_instance->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
         app_instance->input_event =
             furi_pubsub_subscribe(app_instance->input_event_queue, on_input, NULL);
+        auth_headers_alloc();
     }
     flip_social_canvas_draw_explore(
         canvas, flip_social_explore->usernames[flip_social_explore->index], last_explore_response);
@@ -771,9 +771,7 @@ void flip_social_callback_draw_explore(Canvas* canvas, void* model) {
             app_instance->login_username_logged_in,
             flip_social_explore->usernames[flip_social_explore->index]);
         flipper_http_post_request_with_headers(
-            "https://www.flipsocial.net/api/user/add-friend/",
-            "{\"Content-Type\":\"application/json\"}",
-            add_payload);
+            "https://www.flipsocial.net/api/user/add-friend/", auth_headers, add_payload);
         canvas_clear(canvas);
         flip_social_canvas_draw_explore(
             canvas, flip_social_explore->usernames[flip_social_explore->index], "Added!");
@@ -789,9 +787,7 @@ void flip_social_callback_draw_explore(Canvas* canvas, void* model) {
             app_instance->login_username_logged_in,
             flip_social_explore->usernames[flip_social_explore->index]);
         flipper_http_post_request_with_headers(
-            "https://www.flipsocial.net/api/user/remove-friend/",
-            "{\"Content-Type\":\"application/json\"}",
-            remove_payload);
+            "https://www.flipsocial.net/api/user/remove-friend/", auth_headers, remove_payload);
         canvas_clear(canvas);
         flip_social_canvas_draw_explore(
             canvas, flip_social_explore->usernames[flip_social_explore->index], "Removed!");
@@ -834,6 +830,7 @@ void flip_social_callback_draw_friends(Canvas* canvas, void* model) {
         app_instance->input_event_queue = furi_record_open(RECORD_INPUT_EVENTS);
         app_instance->input_event =
             furi_pubsub_subscribe(app_instance->input_event_queue, on_input, NULL);
+        auth_headers_alloc();
     }
     flip_social_canvas_draw_explore(
         canvas, flip_social_friends->usernames[flip_social_friends->index], last_explore_response);
@@ -850,9 +847,7 @@ void flip_social_callback_draw_friends(Canvas* canvas, void* model) {
             app_instance->login_username_logged_in,
             flip_social_friends->usernames[flip_social_friends->index]);
         if(flipper_http_post_request_with_headers(
-               "https://www.flipsocial.net/api/user/add-friend/",
-               "{\"Content-Type\":\"application/json\"}",
-               add_payload)) {
+               "https://www.flipsocial.net/api/user/add-friend/", auth_headers, add_payload)) {
             canvas_clear(canvas);
             flip_social_canvas_draw_explore(
                 canvas, flip_social_friends->usernames[flip_social_friends->index], "Added!");
@@ -878,7 +873,7 @@ void flip_social_callback_draw_friends(Canvas* canvas, void* model) {
             flip_social_friends->usernames[flip_social_friends->index]);
         if(flipper_http_post_request_with_headers(
                "https://www.flipsocial.net/api/user/remove-friend/",
-               "{\"Content-Type\":\"application/json\"}",
+               auth_headers,
                remove_payload)) {
             canvas_clear(canvas);
             flip_social_canvas_draw_explore(

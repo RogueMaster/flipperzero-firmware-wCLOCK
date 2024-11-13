@@ -200,6 +200,16 @@ FlipWiFiApp* flip_wifi_app_alloc() {
     // Load the playlist from storage
     if(!load_playlist(&app->wifi_playlist)) {
         FURI_LOG_E(TAG, "Failed to load playlist");
+
+        // playlist is empty?
+        submenu_reset(app->submenu_wifi_saved);
+        submenu_set_header(app->submenu_wifi_saved, "Saved APs");
+        submenu_add_item(
+            app->submenu_wifi_saved,
+            "[Add Network]",
+            FlipWiFiSubmenuIndexWiFiSavedAddSSID,
+            callback_submenu_choices,
+            app);
     } else {
         // Update the submenu
         flip_wifi_redraw_submenu_saved(app);

@@ -4,11 +4,20 @@
 
 #include <furi.h>
 
-#define KEY_NAME_SIZE                       40
-#define TEXT_STORE_SIZE                     256
+#define RX_BUF_SIZE         (2096)
+#define LAST_RESPONSE_SIZE  (2096)
+#define MAX_WIFI_NETWORKS   20
+#define MAX_SSID_LENGTH     128
+#define MAX_PASSWORD_LENGTH 128
+#define CONNECT_CMD_BUFFER_SIZE                       \
+    (16 + MAX_SSID_LENGTH + 1 + MAX_PASSWORD_LENGTH + \
+     1) // "WIFI_CONNECT: " + ssid + " " + password + null terminator
+#define MAX_WIFI_CREDENTIALS 10 // Define the maximum number of WiFi credentials
+
+#define KEY_NAME_SIZE 40
+#define TEXT_STORE_SIZE \
+    1024 // Approximate size of bearer token is around 800, hopefully this will be enough
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
-#define MAX_URLS                            10
-#define MAX_URLS_BUILD_HTTP                 5
 
 /** all scenes */
 
@@ -48,6 +57,7 @@ typedef enum {
     AppView_Post_Url_List,
     AppView_BuildHttpCall,
     AppView_BuildHttp_Url_List,
+    AppView_BuildHttp_Headers,
     // AppView_Listen,
     // AppView_About,
     AppView_Display,
@@ -67,6 +77,8 @@ typedef enum {
     AppEvent_Build_Http_Url,
     AppEvent_Build_Http_Payload,
     AppEvent_Build_Http_Url_List,
+    AppEvent_Build_Http_Header_Key,
+    AppEvent_Build_Http_Header_Value,
     AppEvent_Download,
     AppEvent_Listen,
     AppEvent_About,
@@ -114,16 +126,6 @@ typedef struct {
     const char* description;
     void (*execute)(const char* argument);
 } Command;
-
-#define RX_BUF_SIZE         (2096)
-#define LAST_RESPONSE_SIZE  (2096)
-#define MAX_WIFI_NETWORKS   20
-#define MAX_SSID_LENGTH     128
-#define MAX_PASSWORD_LENGTH 128
-#define CONNECT_CMD_BUFFER_SIZE                       \
-    (16 + MAX_SSID_LENGTH + 1 + MAX_PASSWORD_LENGTH + \
-     1) // "WIFI_CONNECT: " + ssid + " " + password + null terminator
-#define MAX_WIFI_CREDENTIALS 10 // Define the maximum number of WiFi credentials
 
 typedef struct {
     char ssid[MAX_SSID_LENGTH];

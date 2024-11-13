@@ -40,12 +40,9 @@ bool flip_social_get_explore() {
         STORAGE_EXT_PATH_PREFIX "/apps_data/flip_social/users.txt");
 
     fhttp.save_received_data = true;
-    char* headers = jsmn("Content-Type", "application/json");
-    // will return true unless the devboard is not connected
-    bool success = flipper_http_get_request_with_headers(
-        "https://www.flipsocial.net/api/user/users/", headers);
-    free(headers);
-    if(!success) {
+    auth_headers_alloc();
+    if(!flipper_http_get_request_with_headers(
+           "https://www.flipsocial.net/api/user/users/", auth_headers)) {
         FURI_LOG_E(TAG, "Failed to send HTTP request for explore");
         fhttp.state = ISSUE;
         return false;

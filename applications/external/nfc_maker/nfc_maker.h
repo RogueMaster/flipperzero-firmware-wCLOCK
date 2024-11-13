@@ -15,6 +15,8 @@
 #include <lib/flipper_format/flipper_format.h>
 #include <toolbox/name_generator.h>
 #include <applications/main/nfc/nfc_app_i.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight.h>
+#include <lib/nfc/helpers/nfc_data_generator.h>
 #include <furi_hal_bt.h>
 
 #define MAC_INPUT_LEN   GAP_MAC_ADDR_SIZE

@@ -92,27 +92,29 @@ void flip_social_free_feed() {
 }
 
 bool flip_social_get_feed() {
+    if(!app_instance) {
+        FURI_LOG_E(TAG, "FlipSocialApp is NULL");
+        return false;
+    }
     // Get the feed from the server
     if(app_instance->login_username_logged_out == NULL) {
         FURI_LOG_E(TAG, "Username is NULL");
         return false;
     }
-    char command[128];
     snprintf(
         fhttp.file_path,
         sizeof(fhttp.file_path),
         STORAGE_EXT_PATH_PREFIX "/apps_data/flip_social/feed.txt");
 
     fhttp.save_received_data = true;
-    char* headers = jsmn("Content-Type", "application/json");
+    auth_headers_alloc();
+    char command[96];
     snprintf(
         command,
-        128,
+        96,
         "https://www.flipsocial.net/api/feed/40/%s/extended/",
         app_instance->login_username_logged_out);
-    bool success = flipper_http_get_request_with_headers(command, headers);
-    free(headers);
-    if(!success) {
+    if(!flipper_http_get_request_with_headers(command, auth_headers)) {
         FURI_LOG_E(TAG, "Failed to send HTTP request for feed");
         fhttp.state = ISSUE;
         return false;

@@ -16,14 +16,14 @@ void nfc_maker_scene_contact_mail_on_enter(void* context) {
 
     nfc_maker_text_input_set_header_text(text_input, "Enter Email Address:");
 
-    strlcpy(app->mail_buf, "ben.dover@example.com", MAIL_INPUT_LEN);
+    strlcpy(app->mail_buf, "johnsmith@email.com", sizeof(app->mail_buf));
 
     nfc_maker_text_input_set_result_callback(
         text_input,
         nfc_maker_scene_contact_mail_text_input_callback,
         app,
         app->mail_buf,
-        MAIL_INPUT_LEN,
+        sizeof(app->mail_buf),
         true);
 
     nfc_maker_text_input_set_minimum_length(text_input, 0);

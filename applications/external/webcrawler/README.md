@@ -12,7 +12,7 @@
 - Video tutorial: https://www.youtube.com/watch?v=lkui2Smckq4
 
 ## Features
-- **Configurable Request**: Specify the URL of the website you want to send a HTTP request to.
+- **Configurable Request**: Specify the URL of the website you want to send a HTTP request to or download (tested up to 427Mb)
 - **Wi-Fi Configuration**: Enter your Wi-Fi SSID and password to enable network communication.
 - **File Management**: Automatically saves and manages received data on the device's storage, allowing users to view, rename, and delete the received data at any time.
 
@@ -33,6 +33,9 @@
    - https://httpbin.org/post Returns POST data.
    - https://httpbin.org/put Returns PUT data.
    - https://httpbin.org/delete Returns DELETE data.
+   - https://httpbin.org/bytes/1024 Returns BYTES data (DOWNLOAD method)
+   - https://proof.ovh.net/files/1Mb.dat Returns BYTES data (DOWNLOAD method - it can download the whole file)
+   - https://proof.ovh.net/files/10Mb.dat Returns BYTES data (DOWNLOAD method - it can download the whole file)
 
 5. **Running the Request**: Select **Run** from the main submenu to start the HTTP request process. The app will:
    - **Send Request**: Transmit the HTTP request via serial to the WiFi Dev Board.
@@ -49,7 +52,7 @@
    - Enter the complete URL of the website you intend to crawl (e.g., https://www.example.com/).
 
 2. **HTTP Method**
-   - Choose between GET, POST, DELETE, and PUT.
+   - Choose between GET, POST, DELETE, PUT, and DOWNLOAD.
 
 3. **Headers**
    - Add your required headers to be used in your HTTP requests
@@ -80,5 +83,9 @@ The Web Crawler app uses logging to help identify issues:
 - **Error Logs**: Indicate problems encountered during execution (e.g., failed to open settings file).
 
 Connect your Flipper Zero to a computer and use a serial terminal to view these logs for detailed troubleshooting.
+
+## Known Issues
+1. **Screen Delay**: Occasionally, the Run screen may get stuck on "Receiving Data".
+   - If it takes longer than 10 seconds, restart your Flipper Zero.
 
 *Happy Crawling! 🕷️* 

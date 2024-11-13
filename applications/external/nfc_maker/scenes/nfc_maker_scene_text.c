@@ -16,15 +16,17 @@ void nfc_maker_scene_text_on_enter(void* context) {
 
     nfc_maker_text_input_set_header_text(text_input, "Enter Text Note:");
 
-    strlcpy(app->big_buf, "Lorem ipsum", BIG_INPUT_LEN);
+    strlcpy(app->big_buf, "Lorem ipsum", sizeof(app->big_buf));
 
     nfc_maker_text_input_set_result_callback(
         text_input,
         nfc_maker_scene_text_text_input_callback,
         app,
         app->big_buf,
-        BIG_INPUT_LEN,
+        sizeof(app->big_buf),
         true);
+
+    nfc_maker_text_input_show_illegal_symbols(text_input, true);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcMakerViewTextInput);
 }

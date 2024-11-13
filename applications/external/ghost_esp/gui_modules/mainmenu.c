@@ -25,6 +25,8 @@ typedef struct {
 struct MainMenu {
     View* view;
     FuriTimer* locked_timer;
+    MainMenuItemCallback help_callback;
+    void* help_context;
 };
 
 typedef struct {
@@ -96,26 +98,16 @@ static size_t main_menu_items_on_screen(MainMenuModel* model) {
 }
 
 static bool is_valid_icon_index(size_t position) {
-    return position <= 3;
+    return position <= 4;
 }
 
-static void draw_header(Canvas* canvas, const FuriString* header, uint8_t y_position) {
-    if(!furi_string_empty(header)) {
-        canvas_set_font(canvas, FontSecondary);
-
-        const char* header_text = furi_string_get_cstr(header);
-        int width = canvas_string_width(canvas, header_text);
-        int x_pos = (canvas_width(canvas) - width) / 2;
-
-        // Draw shadow
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_str(canvas, x_pos + 1, y_position + 1, header_text);
-
-        // Draw main text
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_str(canvas, x_pos, y_position, header_text);
-    }
+// Add the new helper function:
+void main_menu_set_help_callback(MainMenu* main_menu, MainMenuItemCallback callback, void* context) {
+    furi_assert(main_menu);
+    main_menu->help_callback = callback;
+    main_menu->help_context = context;
 }
+
 static CardLayout calculate_card_layout(
     Canvas* canvas,
     size_t total_cards,
@@ -190,7 +182,6 @@ static void draw_card_label(
         layout->y + layout->height - TEXT_BOTTOM_MARGIN,
         furi_string_get_cstr(label));
 }
-
 static void main_menu_view_draw_callback(Canvas* canvas, void* _model) {
     MainMenuModel* model = _model;
     const size_t total_cards = MainMenuItemArray_size(model->items);
@@ -198,10 +189,7 @@ static void main_menu_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_clear(canvas);
 
-    if(!furi_string_empty(model->header)) {
-        draw_header(canvas, model->header, BASE_Y_POSITION + CARD_HEIGHT + 10);
-    }
-
+    // Draw all menu items first
     size_t position = 0;
     MainMenuItemArray_it_t it;
     for(MainMenuItemArray_it(it, model->items); !MainMenuItemArray_end_p(it);
@@ -223,10 +211,12 @@ static void main_menu_view_draw_callback(Canvas* canvas, void* _model) {
             case 1:
                 icon = &I_BLE_icon;
                 break;
-            // case 2: icon = &I_GPS; break;
             case 2:
+                icon = &I_GPS;
+                break; // Use GPS icon for position 2
+            case 3:
                 icon = &I_Cog;
-                break;
+                break; // Use Settings icon for position 3
             }
         }
 
@@ -240,8 +230,30 @@ static void main_menu_view_draw_callback(Canvas* canvas, void* _model) {
 
         position++;
     }
-}
 
+    // Draw help button last, so it's on top of everything
+    canvas_set_font(canvas, FontSecondary);
+    canvas_set_color(canvas, ColorBlack);
+
+    const size_t vertical_offset = 3;
+    const size_t horizontal_offset = 3;
+    const size_t string_width = canvas_string_width(canvas, "Help");
+    const Icon* icon = &I_ButtonDown_7x4;
+    const int32_t icon_h_offset = 3;
+    const int32_t icon_width_with_offset = icon_get_width(icon) + icon_h_offset;
+    const int32_t icon_v_offset = icon_get_height(icon) + vertical_offset + 1;
+    const size_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
+    const int32_t x = (canvas_width(canvas) - button_width) / 2;
+    const int32_t y = canvas_height(canvas);
+
+    // Position at bottom with proper margins
+    canvas_draw_str(canvas, x + horizontal_offset, y - vertical_offset, "Help");
+    canvas_draw_icon(
+        canvas, x + horizontal_offset + string_width + icon_h_offset, y - icon_v_offset, icon);
+    // Reset color
+    canvas_set_color(canvas, ColorBlack);
+}
 static bool main_menu_view_input_callback(InputEvent* event, void* context) {
     MainMenu* main_menu = context;
     furi_assert(main_menu);
@@ -275,6 +287,13 @@ static bool main_menu_view_input_callback(InputEvent* event, void* context) {
         case InputKeyOk:
             consumed = true;
             main_menu_process_ok(main_menu);
+            break;
+        case InputKeyDown:
+            // Handle help button press
+            if(main_menu->help_callback) {
+                main_menu->help_callback(main_menu->help_context, 0);
+                consumed = true;
+            }
             break;
         default:
             break;

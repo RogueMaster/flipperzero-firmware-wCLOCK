@@ -61,7 +61,7 @@ FlipTrader is an app for the Flipper Zero that uses WiFi to fetch the prices of 
 FlipTrader automatically allocates necessary resources and initializes settings upon launch. If WiFi settings have been previously configured, they are loaded automatically for convenience.
 
 ## How to Use
-1. **Flash the WiFi Devboard**: Follow the instructions to flash the WiFi Devboard with FlipperHTTP: https://github.com/jblanked/FlipperHTTP.
+1. **Flash the WiFi Devboard**: Follow the instructions to flash the WiFi Devboard with FlipperHTTP:https://github.com/jblanked/FlipperHTTP
 2. **Install the App**: Download FlipTrader from the App Store.
 3. **Launch FlipTrader**: Open the app on your Flipper Zero.
 4. **Explore the Features**:
@@ -70,5 +70,5 @@ FlipTrader automatically allocates necessary resources and initializes settings 
    - Use **WiFi Settings** to manage your network configurations.
 
 ## Known Issues
-1. **Asset Screen Delay**: Occasionally, the Asset Price screen may get stuck on "Loading Data" or take up to 30 seconds to display information.
-   - **Solution**: Restart your Flipper Zero if this occurs. 
+1. **Asset Screen Delay**: Occasionally, the Asset Price screen may get stuck on "Loading Data".
+    - If it takes longer than 10 seconds, restart your Flipper Zero.

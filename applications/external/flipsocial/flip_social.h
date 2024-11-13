@@ -327,5 +327,7 @@ extern bool flip_social_dialog_stop;
 extern bool flip_social_send_message;
 extern char* last_explore_response;
 extern char* selected_message;
+extern char auth_headers[256];
 
+void auth_headers_alloc(void);
 #endif

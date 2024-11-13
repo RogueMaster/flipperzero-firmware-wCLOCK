@@ -59,6 +59,12 @@ void flip_weather_app_free(FlipWeatherApp* app) {
         uart_text_input_free(app->uart_text_input_password);
     }
 
+    // Free Popup(s)
+    if(app->popup_error) {
+        view_dispatcher_remove_view(app->view_dispatcher, FlipWeatherViewPopupError);
+        popup_free(app->popup_error);
+    }
+
     // Free the text input buffer
     if(app->uart_text_input_buffer_ssid) free(app->uart_text_input_buffer_ssid);
     if(app->uart_text_input_temp_buffer_ssid) free(app->uart_text_input_temp_buffer_ssid);
